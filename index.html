@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BK SafeID Coach – Trợ lý AI An toàn số THPT</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Be Vietnam Pro & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              dark: '#0B192C',
+              navy: '#1E3E62',
+              blue: '#0284C7',
+              teal: '#0D9488',
+              mint: '#14B8A6',
+              light: '#F0FDFA',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .typing-dot {
+      animation: typing 1.4s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .markdown-body p { margin-bottom: 0.5rem; }
+    .markdown-body p:last-child { margin-bottom: 0; }
+    .markdown-body ul, .markdown-body ol { margin-left: 1.25rem; margin-bottom: 0.5rem; }
+    .markdown-body ul { list-style-type: disc; }
+    .markdown-body ol { list-style-type: decimal; }
+    .markdown-body li { margin-bottom: 0.25rem; }
+    .markdown-body strong { font-weight: 700; color: #0F172A; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-teal-200 selection:text-teal-900">
+
+  <!-- TOAST / NOTIFICATION BANNER -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- CUSTOM CONFIRMATION MODAL -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 transform transition-all">
+      <div class="flex items-center gap-3 text-rose-600 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <h3 id="confirmTitle" class="text-lg font-bold text-slate-900">Xác nhận thao tác</h3>
+      </div>
+      <p id="confirmMessage" class="text-sm text-slate-600 leading-relaxed mb-5"></p>
+      <div class="flex items-center justify-end gap-3">
+        <button id="confirmCancelBtn" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">Hủy bỏ</button>
+        <button id="confirmOkBtn" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 transition shadow-sm">Xác nhận xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÀN HÌNH 1: ĐĂNG NHẬP & QUẢN LÝ MÃ ẨN DANH -->
+  <section id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-[#0B192C] to-teal-950">
+    <div class="max-w-lg w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200/80">
+      <div class="bg-gradient-to-r from-[#0B192C] via-[#1E3E62] to-teal-800 p-7 text-white relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-36 h-36 bg-teal-400/10 rounded-full blur-2xl"></div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/40 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-7 h-7 text-teal-300"></i>
+          </div>
+          <div>
+            <span class="inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-200 border border-teal-400/30 mb-1">Trường THPT Chuyên Bắc Kạn</span>
+            <h1 class="text-2xl font-extrabold tracking-tight">BK SafeID Coach</h1>
+          </div>
+        </div>
+        <p class="text-sm text-slate-200 leading-relaxed">
+          Trợ lý AI định hình an toàn số, nhận diện mạo danh Deepfake và rèn luyện kỹ năng tự bảo vệ trên không gian mạng dành cho học sinh THPT.
+        </p>
+      </div>
+
+      <div class="p-7 space-y-5">
+        <div>
+          <label for="anonCodeInput" class="block text-sm font-bold text-slate-800 mb-1.5">
+            Nhập mã ẩn danh nghiên cứu của bạn
+          </label>
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <div class="relative flex-1">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                <i data-lucide="key-round" class="w-4 h-4"></i>
+              </span>
+              <input
+                type="text"
+                id="anonCodeInput"
+                maxlength="16"
+                placeholder="Ví dụ: BK001"
+                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-slate-900 font-bold tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
+              />
+            </div>
+            <button
+              type="button"
+              id="generateCodeBtn"
+              class="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm flex items-center justify-center gap-2 border border-slate-200 transition shrink-0"
+            >
+              <i data-lucide="sparkles" class="w-4 h-4 text-teal-600"></i>
+              <span>Tạo mã tự động</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 mt-1.5">
+            Hệ thống tự động chuẩn hóa chữ hoa và xóa khoảng trắng. Nếu đã có mã trước đó, nhập lại đúng mã để tiếp tục tiến trình trên thiết bị này.
+          </p>
+        </div>
+
+        <div class="bg-teal-50/80 border border-teal-200 rounded-2xl p-4 space-y-2">
+          <div class="flex items-center gap-2 text-teal-900 font-bold text-xs uppercase tracking-wide">
+            <i data-lucide="lock" class="w-4 h-4 text-teal-600"></i>
+            <span>Cam kết bảo mật & Quyền riêng tư dữ liệu</span>
+          </div>
+          <ul class="text-xs text-slate-700 space-y-1.5 leading-relaxed list-disc pl-4">
+            <li><strong>Không thu thập định danh:</strong> Tuyệt đối không yêu cầu họ tên thật, số điện thoại, số CCCD, email, mật khẩu hay mã OTP.</li>
+            <li><strong>Lưu trữ cục bộ (LocalStorage):</strong> Tiến trình luyện tập và điểm A–B–G được lưu tách biệt theo từng mã ngay trên trình duyệt.</li>
+            <li><strong>Xử lý AI an toàn:</strong> Nội dung phân tích chỉ gửi tới Gemini AI để phản hồi tức thời, không lưu tệp đa phương tiện lâu dài.</li>
+          </ul>
+        </div>
+
+        <div class="flex items-start gap-2.5">
+          <input type="checkbox" id="termsCheckbox" checked class="mt-1 w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer" />
+          <label for="termsCheckbox" class="text-xs text-slate-700 leading-relaxed cursor-pointer select-none">
+            Tôi đồng ý với điều khoản sử dụng và cam kết bảo mật thông tin nghiên cứu (dữ liệu chỉ dùng cho mục đích khoa học và tự bảo vệ số).
+          </label>
+        </div>
+
+        <button
+          type="button"
+          id="startAppBtn"
+          class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-bold text-base shadow-lg shadow-teal-600/25 flex items-center justify-center gap-2 transition transform active:scale-[0.99]"
+        >
+          <span>Bắt đầu trải nghiệm</span>
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MÀN HÌNH 2: ỨNG DỤNG CHÍNH BK SAFEID COACH -->
+  <div id="mainApp" class="hidden flex-1 flex flex-col min-h-screen">
+    <header class="bg-[#0B192C] text-white sticky top-0 z-30 shadow-md border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-400/40 flex items-center justify-center shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5 text-teal-400"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-base sm:text-lg tracking-tight">BK SafeID Coach</span>
+              <span class="hidden md:inline-block text-[11px] bg-teal-500/20 text-teal-300 border border-teal-500/30 px-2 py-0.5 rounded-full font-medium">THPT Chuyên Bắc Kạn</span>
+            </div>
+            <p class="text-[11px] text-slate-400 hidden sm:block">Trợ lý AI định hình an toàn số & phòng chống mạo danh</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-xl">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs text-slate-300 hidden sm:inline">Mã ẩn danh:</span>
+            <span id="currentCodeDisplay" class="text-xs sm:text-sm font-extrabold text-teal-300 tracking-wider">BK001</span>
+          </div>
+
+          <button
+            id="switchCodeBtn"
+            title="Đổi mã hoặc Đăng xuất"
+            class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-1.5 transition"
+          >
+            <i data-lucide="log-out" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span class="hidden md:inline">Đổi mã / Đăng xuất</span>
+          </button>
+
+          <button
+            id="deleteProgressBtn"
+            title="Xóa tiến trình của mã này"
+            class="px-3 py-1.5 rounded-xl bg-rose-950/70 hover:bg-rose-900 text-rose-200 text-xs font-semibold border border-rose-800/70 flex items-center gap-1.5 transition"
+          >
+            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+            <span class="hidden md:inline">Xóa dữ liệu</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD CHỈ SỐ A - B - G & TIẾN TRÌNH -->
+    <section class="bg-white border-b border-slate-200 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
+            <div class="bg-gradient-to-br from-sky-50 to-white border border-sky-200/80 rounded-2xl p-3.5 flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold uppercase tracking-wider text-sky-700">Nhận thức (A)</span>
+                  <span class="text-[10px] text-slate-400">(Awareness)</span>
+                </div>
+                <div id="scoreADisplay" class="text-lg sm:text-xl font-extrabold text-slate-800 mt-1">Chưa đánh giá</div>
+                <p class="text-[11px] text-slate-500 mt-0.5">Thang điểm 100 (Phần A)</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                <i data-lucide="brain-circuit" class="w-5 h-5"></i>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-teal-50 to-white border border-teal-200/80 rounded-2xl p-3.5 flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Hành vi (B)</span>
+                  <span class="text-[10px] text-slate-400">(Behavior)</span>
+                </div>
+                <div id="scoreBDisplay" class="text-lg sm:text-xl font-extrabold text-slate-800 mt-1">Chưa đánh giá</div>
+                <p class="text-[11px] text-slate-500 mt-0.5">Thang điểm 100 (Phần B)</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-50 to-white border border-indigo-200/80 rounded-2xl p-3.5 flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">Khoảng cách (G)</span>
+                  <span class="text-[10px] text-slate-400">(G = A − B)</span>
+                </div>
+                <div id="scoreGDisplay" class="text-lg sm:text-xl font-extrabold text-slate-800 mt-1">Chưa đánh giá</div>
+                <p id="gapStatusText" class="text-[11px] text-slate-500 mt-0.5">Cần hoàn thành đủ Phần A & B</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                <i data-lucide="git-compare-arrows" class="w-5 h-5"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 lg:w-72 flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
+              <span>Tiến trình hồ sơ <span id="progressCodeBadge" class="text-teal-700 font-bold">BK001</span></span>
+              <span id="practiceCountBadge" class="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full text-[11px]">0/11 mục</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden mb-2">
+              <div id="progressBarFill" class="bg-gradient-to-r from-teal-500 to-sky-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500">
+              <span>Lưu cục bộ (LocalStorage)</span>
+              <button onclick="switchTab('practice')" class="text-teal-700 font-bold hover:underline">Làm bài đánh giá →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5 flex flex-col lg:flex-row gap-5">
+      <nav aria-label="Chức năng chính" class="lg:w-64 shrink-0">
+        <div class="flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0">
+          <button data-tab="chat" class="nav-tab-btn active flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-left transition whitespace-nowrap bg-[#0B192C] text-white shadow-md">
+            <i data-lucide="message-square-heart" class="w-5 h-5 text-teal-400 shrink-0"></i>
+            <div>
+              <div>Trò chuyện an toàn số</div>
+              <div class="text-[11px] font-normal opacity-80 hidden lg:block">Tư vấn AI thông minh 24/7</div>
+            </div>
+          </button>
+
+          <button data-tab="image" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-left transition whitespace-nowrap bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="image-plus" class="w-5 h-5 text-sky-600 shrink-0"></i>
+            <div>
+              <div>Kiểm tra hình ảnh</div>
+              <div class="text-[11px] font-normal text-slate-500 hidden lg:block">Soi dấu hiệu ảnh AI / chỉnh sửa</div>
+            </div>
+          </button>
+
+          <button data-tab="video" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-left transition whitespace-nowrap bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="video" class="w-5 h-5 text-indigo-600 shrink-0"></i>
+            <div>
+              <div>Kiểm tra video Deepfake</div>
+              <div class="text-[11px] font-normal text-slate-500 hidden lg:block">Tách khung hình & soi khuôn mặt</div>
+            </div>
+          </button>
+
+          <button data-tab="audio" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-left transition whitespace-nowrap bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="mic" class="w-5 h-5 text-amber-600 shrink-0"></i>
+            <div>
+              <div>Phân tích âm thanh</div>
+              <div class="text-[11px] font-normal text-slate-500 hidden lg:block">Nhận diện kịch bản gọi lừa đảo</div>
+            </div>
+          </button>
+
+          <button data-tab="practice" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-left transition whitespace-nowrap bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="clipboard-check" class="w-5 h-5 text-teal-600 shrink-0"></i>
+            <div>
+              <div>Luyện tập & Đánh giá A–B–G</div>
+              <div class="text-[11px] font-normal text-slate-500 hidden lg:block">Đo lường nhận thức & hành vi</div>
+            </div>
+          </button>
+
+          <button data-tab="knowledge" class="nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-left transition whitespace-nowrap bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="book-open-check" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+            <div>
+              <div>Kho kiến thức & Cẩm nang</div>
+              <div class="text-[11px] font-normal text-slate-500 hidden lg:block">Kỹ năng tự bảo vệ cho THPT</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="hidden lg:block mt-4 bg-white border border-slate-200 rounded-2xl p-4 text-xs text-slate-600 space-y-2">
+          <div class="font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-4 h-4 text-teal-600"></i>
+            <span>Nguyên tắc hỗ trợ</span>
+          </div>
+          <p class="leading-relaxed">
+            AI hỗ trợ phân tích dấu hiệu nghi vấn và hướng dẫn quy trình an toàn. Không thay thế giám định pháp y kỹ thuật số. Khi gặp khẩn cấp, hãy báo ngay cho <strong>bố mẹ, thầy cô</strong> hoặc gọi <strong>113</strong>.
+          </p>
+        </div>
+      </nav>
+
+      <!-- WORKSPACE: 6 PHÂN HỆ CHỨC NĂNG -->
+      <div class="flex-1 min-w-0">
+
+        <!-- TAB 1: TRÒ CHUYỆN & TƯ VẤN AN TOÀN SỐ -->
+        <div id="tab-chat" class="tab-panel bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[640px] overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold shadow-sm">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h2 class="text-sm font-bold text-slate-900">Tư vấn An toàn số trực tiếp (Gemini AI)</h2>
+                <p class="text-xs text-slate-500">Hiểu ngữ cảnh hội thoại • Hướng dẫn từng bước cụ thể • Không lưu thông tin nhạy cảm</p>
+              </div>
+            </div>
+            <button id="clearChatBtn" class="text-xs font-semibold text-slate-500 hover:text-rose-600 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition flex items-center gap-1">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>Làm mới hội thoại</span>
+            </button>
+          </div>
+
+          <div id="chatMessages" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/40"></div>
+
+          <div class="px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto">
+            <span class="text-[11px] font-semibold text-slate-400 shrink-0">Gợi ý nhanh:</span>
+            <button type="button" class="quick-prompt-btn text-xs bg-slate-100 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-200 text-slate-700 px-3 py-1.5 rounded-full border border-slate-200 transition whitespace-nowrap">
+              Tớ lỡ đăng ảnh có lộ số CCCD lên story thì làm sao?
+            </button>
+            <button type="button" class="quick-prompt-btn text-xs bg-slate-100 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-200 text-slate-700 px-3 py-1.5 rounded-full border border-slate-200 transition whitespace-nowrap">
+              Bạn thân nhắn Messenger vay tiền gấp, gọi video thấy mặt nhưng rè tiếng
+            </button>
+            <button type="button" class="quick-prompt-btn text-xs bg-slate-100 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-200 text-slate-700 px-3 py-1.5 rounded-full border border-slate-200 transition whitespace-nowrap">
+              Tớ vừa lỡ đọc mã OTP cho người tự xưng công an!
+            </button>
+            <button type="button" class="quick-prompt-btn text-xs bg-slate-100 hover:bg-teal-50 hover:text-teal-800 hover:border-teal-200 text-slate-700 px-3 py-1.5 rounded-full border border-slate-200 transition whitespace-nowrap">
+              Bị dọa ghép ảnh nhạy cảm bằng AI để tống tiền
+            </button>
+          </div>
+
+          <form id="chatForm" class="p-3 sm:p-4 bg-white border-t border-slate-200 flex items-end gap-2.5">
+            <textarea
+              id="chatInput"
+              rows="1"
+              placeholder="Nhập tình huống hoặc câu hỏi của bạn (không nhập mật khẩu hay mã OTP thật)..."
+              class="flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 max-h-32"
+            ></textarea>
+            <button
+              type="submit"
+              id="sendChatBtn"
+              class="px-4 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 text-white font-bold text-sm flex items-center gap-1.5 transition shrink-0 shadow-sm"
+            >
+              <span class="hidden sm:inline">Gửi</span>
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- TAB 2: KIỂM TRA HÌNH ẢNH NGHI GIẢ MẠO -->
+        <div id="tab-image" class="tab-panel hidden bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+          <div class="border-b border-slate-200 pb-4">
+            <div class="flex items-center gap-2 text-sky-700 font-bold text-xs uppercase tracking-wider mb-1">
+              <i data-lucide="scan-face" class="w-4 h-4"></i>
+              <span>Phân tích thị giác AI (Gemini Vision)</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900">Kiểm tra hình ảnh nghi giả mạo / chỉnh sửa AI</h2>
+            <p class="text-sm text-slate-600 mt-1">
+              Tải ảnh lên để AI hỗ trợ soi các dấu hiệu bất thường về ánh sáng, đường viền khuôn mặt, giải phẫu bàn tay và độ nhất quán chi tiết nền. Ảnh chỉ xử lý trên bộ nhớ tạm, <strong>không lưu vào hệ thống</strong>.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <label for="imageFileInput" class="border-2 border-dashed border-slate-300 hover:border-sky-500 bg-slate-50 hover:bg-sky-50/40 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition">
+                <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3">
+                  <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                </div>
+                <span class="text-sm font-bold text-slate-800">Bấm để chọn ảnh từ thiết bị</span>
+                <span class="text-xs text-slate-500 mt-1">Hỗ trợ JPG, PNG, WEBP (Tối đa 5 MB)</span>
+                <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/webp" class="hidden" />
+              </label>
+
+              <div id="imagePreviewBox" class="hidden bg-slate-900 rounded-2xl p-3 relative">
+                <img id="imagePreviewEl" src="" alt="Xem trước ảnh kiểm tra" class="max-h-72 mx-auto rounded-xl object-contain" />
+                <button type="button" id="removeImageBtn" class="absolute top-5 right-5 bg-slate-900/80 hover:bg-rose-600 text-white p-2 rounded-xl text-xs flex items-center gap-1 transition">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <div>
+                <label for="imageContextInput" class="block text-xs font-bold text-slate-700 mb-1">Bối cảnh bức ảnh (tùy chọn):</label>
+                <input type="text" id="imageContextInput" placeholder="Ví dụ: Ảnh chụp CCCD người lạ gửi qua Zalo, ảnh đại diện tài khoản mới..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+              </div>
+
+              <button type="button" id="analyzeImageBtn" disabled class="w-full py-3 px-5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 text-white font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm">
+                <i data-lucide="search-check" class="w-4 h-4"></i>
+                <span>Phân tích dấu hiệu nghi vấn</span>
+              </button>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between min-h-[320px]">
+              <div id="imageResultContainer" class="space-y-3">
+                <div class="h-full flex flex-col items-center justify-center text-center py-12 text-slate-400">
+                  <i data-lucide="shield-question" class="w-10 h-10 mb-2 opacity-60"></i>
+                  <p class="text-sm font-medium text-slate-500">Chưa có dữ liệu phân tích</p>
+                  <p class="text-xs mt-1 max-w-xs">Hãy tải lên một bức ảnh và bấm "Phân tích dấu hiệu nghi vấn" để xem báo cáo đánh giá.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: KIỂM TRA VIDEO DEEPFAKE -->
+        <div id="tab-video" class="tab-panel hidden bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+          <div class="border-b border-slate-200 pb-4">
+            <div class="flex items-center gap-2 text-indigo-700 font-bold text-xs uppercase tracking-wider mb-1">
+              <i data-lucide="film" class="w-4 h-4"></i>
+              <span>Trích xuất chuỗi khung hình trực tiếp trên trình duyệt</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900">Kiểm tra video nghi vấn Deepfake</h2>
+            <p class="text-sm text-slate-600 mt-1">
+              Hệ thống tự động trích xuất <strong>5 khung hình quan trọng</strong> theo diễn biến thời gian ngay trên thiết bị của bạn (không cần Google Colab) và phân tích sự nhất quán khuôn mặt, ánh sáng, chuyển động.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <label for="videoFileInput" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/40 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
+                  <i data-lucide="clapperboard" class="w-6 h-6"></i>
+                </div>
+                <span class="text-sm font-bold text-slate-800">Chọn tệp video nghi vấn (MP4, WEBM, MOV)</span>
+                <span class="text-xs text-slate-500 mt-1">Khuyến nghị video ngắn dưới 25 MB để xử lý nhanh trên trình duyệt</span>
+                <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime" class="hidden" />
+              </label>
+
+              <video id="hiddenVideoProcessor" class="hidden" muted playsinline preload="metadata"></video>
+              <canvas id="hiddenFrameCanvas" class="hidden"></canvas>
+
+              <div id="extractedFramesWrapper" class="hidden space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                  <span>5 khung hình đã trích xuất tự động:</span>
+                  <span id="videoDurationBadge" class="text-indigo-600"></span>
+                </div>
+                <div id="framesGrid" class="grid grid-cols-5 gap-2 bg-slate-900 p-2.5 rounded-2xl"></div>
+              </div>
+
+              <div>
+                <label for="videoContextInput" class="block text-xs font-bold text-slate-700 mb-1">Mô tả nguồn video (tùy chọn):</label>
+                <input type="text" id="videoContextInput" placeholder="Ví dụ: Đoạn quay màn hình cuộc gọi video Messenger nghi ghép mặt..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+
+              <button type="button" id="analyzeVideoBtn" disabled class="w-full py-3 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm">
+                <i data-lucide="cpu" class="w-4 h-4"></i>
+                <span>Phân tích chuỗi khung hình Deepfake</span>
+              </button>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 min-h-[320px]">
+              <div id="videoResultContainer" class="space-y-3">
+                <div class="h-full flex flex-col items-center justify-center text-center py-12 text-slate-400">
+                  <i data-lucide="video-off" class="w-10 h-10 mb-2 opacity-60"></i>
+                  <p class="text-sm font-medium text-slate-500">Chưa có video được phân tích</p>
+                  <p class="text-xs mt-1 max-w-xs">Tải video lên để trích xuất khung hình tự động và kiểm tra dấu hiệu giả mạo khuôn mặt.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: PHÂN TÍCH GIỌNG NÓI & ÂM THANH -->
+        <div id="tab-audio" class="tab-panel hidden bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+          <div class="border-b border-slate-200 pb-4">
+            <div class="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-wider mb-1">
+              <i data-lucide="audio-waveform" class="w-4 h-4"></i>
+              <span>Nhận dạng lời nói tiếng Việt & Phân tích kịch bản</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900">Phân tích giọng nói & âm thanh nghi lừa đảo</h2>
+            <p class="text-sm text-slate-600 mt-1">
+              Hỗ trợ tệp ghi âm cuộc gọi hoặc video có tiếng. AI sẽ chuyển lời nói tiếng Việt thành văn bản, phân tích <strong>dấu hiệu kịch bản thao túng/lừa đảo</strong> và tách bạch rõ với <strong>dấu hiệu giọng nói tổng hợp AI</strong>.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <label for="audioFileInput" class="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-slate-50 hover:bg-amber-50/40 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition">
+                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+                  <i data-lucide="file-audio" class="w-6 h-6"></i>
+                </div>
+                <span class="text-sm font-bold text-slate-800">Tải lên tệp âm thanh hoặc video có tiếng</span>
+                <span class="text-xs text-slate-500 mt-1">Hỗ trợ MP3, WAV, M4A, OGG, MP4 (Tối đa 12 MB)</span>
+                <input type="file" id="audioFileInput" accept="audio/*,video/mp4,video/webm" class="hidden" />
+              </label>
+
+              <div id="audioPlayerBox" class="hidden bg-slate-900 text-white rounded-2xl p-4 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span id="audioFileName" class="font-semibold text-amber-300 truncate max-w-[240px]">recording.mp3</span>
+                  <button type="button" id="removeAudioBtn" class="text-slate-400 hover:text-rose-400">Xóa tệp</button>
+                </div>
+                <audio id="audioPreviewEl" controls class="w-full h-9"></audio>
+              </div>
+
+              <button type="button" id="analyzeAudioBtn" disabled class="w-full py-3 px-5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:bg-slate-300 text-white font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm">
+                <i data-lucide="ear" class="w-4 h-4"></i>
+                <span>Gỡ băng lời nói & Phân tích nguy cơ</span>
+              </button>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 min-h-[320px]">
+              <div id="audioResultContainer" class="space-y-3">
+                <div class="h-full flex flex-col items-center justify-center text-center py-12 text-slate-400">
+                  <i data-lucide="volume-x" class="w-10 h-10 mb-2 opacity-60"></i>
+                  <p class="text-sm font-medium text-slate-500">Chưa có tệp âm thanh nào được kiểm tra</p>
+                  <p class="text-xs mt-1 max-w-xs">Tải đoạn ghi âm cuộc gọi hoặc tin nhắn thoại nghi vấn để AI bóc tách nội dung và đánh giá rủi ro.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: LUYỆN TẬP TÌNH HUỐNG & ĐÁNH GIÁ CHỈ SỐ A - B - G -->
+        <div id="tab-practice" class="tab-panel hidden bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+            <div>
+              <div class="flex items-center gap-2 text-teal-700 font-bold text-xs uppercase tracking-wider mb-1">
+                <i data-lucide="target" class="w-4 h-4"></i>
+                <span>Bộ công cụ đo lường chuẩn hóa thang 100</span>
+              </div>
+              <h2 class="text-xl font-extrabold text-slate-900">Đánh giá Nhận thức (A) & Hành vi (B)</h2>
+              <p class="text-sm text-slate-600 mt-1">
+                Hoàn thành cả 2 phần để hệ thống tính chính xác chỉ số khoảng cách <strong>G = A − B</strong> và cập nhật lên hồ sơ <span class="font-bold text-teal-700 practice-code-label">BK001</span>.
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" id="switchPartABtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-sky-600 text-white shadow-sm transition">
+                Phần A: Nhận thức (6 câu)
+              </button>
+              <button type="button" id="switchPartBBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                Phần B: Tình huống hành vi (5 kịch bản)
+              </button>
+            </div>
+          </div>
+
+          <div id="quizContentArea" class="space-y-5"></div>
+
+          <div id="abgSummaryBanner" class="hidden bg-gradient-to-r from-[#0B192C] to-teal-900 text-white rounded-2xl p-5 shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <span class="text-xs font-bold uppercase tracking-wider text-teal-300">Phân tích khoảng cách Nhận thức – Hành vi (G = A − B)</span>
+                <h3 id="abgGroupTitle" class="text-lg font-extrabold">Nhóm đánh giá</h3>
+                <p id="abgGroupAdvice" class="text-sm text-slate-200 leading-relaxed"></p>
+              </div>
+              <div class="flex items-center gap-4 bg-white/10 px-4 py-3 rounded-2xl shrink-0">
+                <div class="text-center">
+                  <div class="text-[11px] text-sky-300 font-semibold">Điểm A</div>
+                  <div id="summaryValA" class="text-xl font-extrabold">--</div>
+                </div>
+                <div class="text-slate-400 font-bold">−</div>
+                <div class="text-center">
+                  <div class="text-[11px] text-teal-300 font-semibold">Điểm B</div>
+                  <div id="summaryValB" class="text-xl font-extrabold">--</div>
+                </div>
+                <div class="text-slate-400 font-bold">=</div>
+                <div class="text-center">
+                  <div class="text-[11px] text-amber-300 font-semibold">Chỉ số G</div>
+                  <div id="summaryValG" class="text-xl font-extrabold text-amber-300">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: HƯỚNG DẪN SỬ DỤNG AI & CẨM NANG AN TOÀN SỐ -->
+        <div id="tab-knowledge" class="tab-panel hidden bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+          <div class="border-b border-slate-200 pb-4">
+            <div class="flex items-center gap-2 text-emerald-700 font-bold text-xs uppercase tracking-wider mb-1">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>Tài liệu hướng dẫn & Cẩm nang thực chiến</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900">Hướng dẫn sử dụng trợ lý BK SafeID Coach</h2>
+            <p class="text-sm text-slate-600 mt-1">
+              Sổ tay nhanh giúp học sinh THPT khai thác tối đa các tính năng thông minh của trợ lý AI.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="border border-slate-200 rounded-2xl p-5 bg-gradient-to-br from-sky-50/60 to-white space-y-2.5">
+              <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center">
+                <i data-lucide="message-square-heart" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-base text-slate-900">1. Trò chuyện tư vấn thông minh</h3>
+              <p class="text-xs text-slate-700 leading-relaxed">
+                Nhập câu hỏi tự nhiên về bất kỳ tình huống nghi lừa đảo, lộ thông tin hoặc Deepfake nào. AI phản hồi cực kỳ nhanh với các bước xử lý từ 2-5 bước cụ thể, rõ ràng.
+              </p>
+            </div>
+
+            <div class="border border-slate-200 rounded-2xl p-5 bg-gradient-to-br from-teal-50/60 to-white space-y-2.5">
+              <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center">
+                <i data-lucide="scan-face" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-base text-slate-900">2. Kiểm tra ảnh, video & âm thanh</h3>
+              <p class="text-xs text-slate-700 leading-relaxed">
+                Tải tệp cần kiểm tra lên các tab tương ứng. Hệ thống AI đánh giá mức độ rủi ro (Thấp, Trung bình, Cao) và cung cấp ngay ô hỏi đáp tiếp theo bên dưới kết quả phân tích.
+              </p>
+            </div>
+
+            <div class="border border-slate-200 rounded-2xl p-5 bg-gradient-to-br from-amber-50/60 to-white space-y-2.5">
+              <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                <i data-lucide="target" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-base text-slate-900">3. Đánh giá chỉ số A – B – G</h3>
+              <p class="text-xs text-slate-700 leading-relaxed">
+                Làm bài trắc nghiệm Nhận thức (Phần A) và Xử lý tình huống hành vi (Phần B) để hệ thống tự động tính khoảng cách G = A − B, giúp bạn tự đánh giá mức độ sẵn sàng bảo vệ bản thân.
+              </p>
+            </div>
+
+            <div class="border border-slate-200 rounded-2xl p-5 bg-gradient-to-br from-rose-50/60 to-white space-y-2.5">
+              <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-base text-slate-900">4. Nguyên tắc bảo mật tuyệt đối</h3>
+              <p class="text-xs text-slate-700 leading-relaxed">
+                Không yêu cầu cung cấp thông tin định danh cá nhân, mật khẩu hay mã OTP. Toàn bộ tiến trình được lưu trữ cục bộ trên thiết bị qua mã ẩn danh <code class="bg-white px-1 py-0.5 rounded border border-rose-200 font-semibold">BKxxx</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // =========================================================================
+    // 1. CẤU HÌNH TRẠNG THÁI & BỘ XỬ LÝ AI TỰ ĐỘNG (KHÔNG YÊU CẦU API KEY)
+    // =========================================================================
+    const apiKey = "";
+    const GEMINI_MODEL = "gemini-2.5-flash";
+
+    const STORAGE_KEY = "bk_safeid_coach_profiles_v1";
+    const ACTIVE_CODE_KEY = "bk_safeid_coach_active_code_v1";
+
+    const SYSTEM_PROMPT = `Bạn là "BK SafeID Coach" – Trợ lý AI định hình an toàn số cho học sinh THPT tại phường Bắc Kạn.
+
+QUY TẮC CỐT LÕI:
+1. TRẢ LỜI CỰC KỲ NHANH, CÔ ĐỌC, ĐI THẲNG VÀO TRỌNG TÂM, tuyệt đối không lan man, không dài dòng.
+2. Phân tích đúng sự cố cụ thể (lộ CCCD, lộ OTP, mất tài khoản, nghi Deepfake, tống tiền) và đưa ra từ 2 đến 5 bước xử lý ngắn gọn theo thứ tự ưu tiên khẩn cấp nhất.
+3. Ghi nhớ ngữ cảnh hội thoại hiện tại; nếu học sinh trả lời ngắn ("rồi", "chưa", "tiếp theo làm gì?"), hãy nối tiếp đúng bước đang hướng dẫn và chỉ hỏi lại MỘT câu cần thiết.
+4. Giao tiếp thân thiện (xưng "mình", gọi học sinh là "bạn").
+5. TUYỆT ĐỐI KHÔNG yêu cầu mật khẩu, mã OTP hay số CCCD thật.`;
+
+    const PART_A_QUESTIONS = [
+      {
+        id: "A1",
+        question: "Công nghệ Deepfake có thể tạo ra cuộc gọi video giả mạo khuôn mặt và giọng nói của người thân chỉ từ những dữ liệu nào?",
+        options: [
+          "Chỉ cần một vài bức ảnh chân dung rõ nét và đoạn ghi âm/video ngắn khoảng 5–15 giây đăng công khai trên mạng xã hội.",
+          "Bắt buộc kẻ xấu phải cài chip theo dõi trực tiếp vào điện thoại của người thân.",
+          "Chỉ thực hiện được nếu người thân từng làm việc tại các hãng công nghệ lớn.",
+          "Không thể giả mạo được cuộc gọi video trực tiếp, chỉ chỉnh sửa được ảnh tĩnh."
+        ],
+        correct: 0,
+        explanation: "Các mô hình AI tạo sinh hiện nay chỉ cần ảnh chân dung rõ nét và mẫu giọng nói vài giây từ Facebook/TikTok công khai là có thể ghép mặt và nhại giọng theo thời gian thực."
+      },
+      {
+        id: "A2",
+        question: "Đâu là dấu hiệu phổ biến nhất của một cuộc gọi video Deepfake lừa đảo vay tiền gấp?",
+        options: [
+          "Cuộc gọi kéo dài hàng chục phút, hình ảnh sắc nét ở mọi góc nghiêng đầu.",
+          "Video chỉ hiện mặt chớp nhoáng 3–5 giây, vùng cổ/viền tóc hơi mờ hoặc giật lag, sau đó viện cớ 'mạng yếu' để tắt cam và nhắn tin giục chuyển tiền.",
+          "Người gọi luôn chủ động đề nghị gặp mặt trực tiếp trước khi nhận tiền.",
+          "Chất lượng âm thanh trong trẻo hơn cả cuộc gọi di động thông thường."
+        ],
+        correct: 1,
+        explanation: "AI ghép mặt thời gian thực dễ lộ lỗi khi nghiêng đầu nhanh hoặc ánh sáng thay đổi, nên kẻ gian thường ngắt video rất sớm và dùng lý do 'sóng yếu' để ép nạn nhân chuyển khoản."
+      },
+      {
+        id: "A3",
+        question: "Khi vô tình đăng nhầm một bức ảnh có lộ số Căn cước công dân (CCCD) lên mạng xã hội, rủi ro lớn nhất có thể xảy ra là gì?",
+        options: [
+          "Tài khoản mạng xã hội của bạn tự động bị đổi mật khẩu ngay lập tức.",
+          "Kẻ xấu thu thập thông tin cá nhân để dàn dựng kịch bản giả danh công an, ngân hàng gọi điện đe dọa hoặc mở tài khoản/ví điện tử trái phép.",
+          "Điện thoại của bạn sẽ bị nhiễm virus thông qua bức ảnh đó.",
+          "Không có rủi ro gì vì số CCCD không phải là mật khẩu ngân hàng."
+        ],
+        correct: 1,
+        explanation: "Lộ thông tin CCCD giúp kẻ lừa đảo tạo lòng tin khi gọi điện giả danh cơ quan chức năng ('đọc đúng số CCCD của em') hoặc lợi dụng đăng ký dịch vụ trực tuyến."
+      },
+      {
+        id: "A4",
+        question: "Về nguyên tắc làm việc của cơ quan Công an, Viện kiểm sát và Tòa án Việt Nam khi làm việc với công dân, nhận định nào sau đây là ĐÚNG?",
+        options: [
+          "Cơ quan công an có thể gọi video qua Zalo/Messenger để đọc lệnh bắt và yêu cầu chuyển tiền vào 'tài khoản tạm giữ' để chứng minh vô tội.",
+          "Cơ quan công an KHÔNG BAO GIỜ làm việc, gửi lệnh bắt qua Zalo/Facebook và KHÔNG BAO GIỜ yêu cầu chuyển tiền qua tài khoản cá nhân để xác minh.",
+          "Học sinh dưới 18 tuổi bắt buộc phải tự giữ bí mật với bố mẹ khi công an gọi điện điều tra online.",
+          "Nếu không cung cấp mã OTP qua điện thoại cho cán bộ điều tra thì sẽ bị khóa CCCD vĩnh viễn."
+        ],
+        correct: 1,
+        explanation: "Cơ quan chức năng chỉ làm việc trực tiếp tại trụ sở hoặc gửi giấy mời/triệu tập bằng văn bản thông qua công an địa phương, tuyệt đối không yêu cầu chuyển tiền online."
+      },
+      {
+        id: "A5",
+        question: "Mã OTP (One-Time Password) gửi về tin nhắn SMS của bạn có vai trò gì?",
+        options: [
+          "Là mã xác nhận giúp bạn bè đăng nhập hộ tài khoản khi mạng yếu.",
+          "Là chìa khóa bảo mật dùng một lần để xác nhận giao dịch chuyển tiền hoặc đổi quyền kiểm soát tài khoản; tuyệt đối không chia sẻ cho bất kỳ ai.",
+          "Là mã công khai dùng để nhận quà tặng từ các chương trình khuyến mãi trên mạng.",
+          "Có thể đọc cho nhân viên ngân hàng qua điện thoại nếu họ biết họ tên của bạn."
+        ],
+        correct: 1,
+        explanation: "Ngay cả nhân viên ngân hàng hay công an cũng không bao giờ được phép hỏi mã OTP của người dân. Để lộ OTP đồng nghĩa với việc trao quyền rút tiền hoặc chiếm đoạt tài khoản."
+      },
+      {
+        id: "A6",
+        question: "Nếu một kẻ xấu dùng AI ghép mặt bạn vào hình ảnh nhạy cảm để đe dọa tống tiền, hiểu biết nào sau đây là chính xác nhất?",
+        options: [
+          "Nên chuyển một khoản tiền nhỏ trước để kẻ xấu xóa ảnh và giữ bí mật.",
+          "Kẻ tống tiền sẽ không bao giờ dừng lại nếu bạn chuyển tiền; cần giữ nguyên bằng chứng, chặn liên lạc và báo ngay cho bố mẹ, thầy cô hoặc cơ quan công an.",
+          "Nên xóa toàn bộ tin nhắn đe dọa và khóa tài khoản để coi như chưa từng có chuyện gì.",
+          "Ảnh ghép bằng AI không thể chứng minh được là giả nên đành chấp nhận làm theo yêu cầu."
+        ],
+        correct: 1,
+        explanation: "Chuyển tiền chỉ khiến kẻ xấu biết bạn dễ bị uy hiếp và tiếp tục đòi thêm. Pháp luật bảo vệ nạn nhân bị cắt ghép hình ảnh bôi nhọ và tống tiền."
+      }
+    ];
+
+    const PART_B_SCENARIOS = [
+      {
+        id: "B1",
+        title: "Tình huống 1: Cuộc gọi video Messenger từ 'bạn thân' vay tiền gấp",
+        context: "21h30 tối, tài khoản Messenger của Minh (bạn thân cùng lớp) nhắn tin hỏi vay gấp 1,5 triệu đồng vì người nhà đang cấp cứu. Bạn gọi video để kiểm tra thì thấy đúng khuôn mặt Minh trong 3 giây đầu nhưng miệng cử động hơi lệch tiếng, sau đó màn hình tối đen kèm tin nhắn: 'Mạng bệnh viện lag quá, chuyển nhanh vào STK này giúp tớ với!'. Bạn sẽ làm gì?",
+        options: [
+          {
+            text: "Chuyển ngay 1,5 triệu đồng vì vừa nhìn thấy mặt Minh qua cuộc gọi video nên đã yên tâm.",
+            score: 0,
+            feedback: "Rủi ro rất cao! Đây là kịch bản kinh điển kết hợp chiếm đoạt tài khoản Messenger và Deepfake khuôn mặt chớp nhoáng 3 giây."
+          },
+          {
+            text: "Ngắt cuộc gọi Messenger, bấm gọi trực tiếp vào số điện thoại di động thông thường của Minh (hoặc gọi cho bố mẹ Minh) để xác minh trước khi làm bất cứ việc gì.",
+            score: 20,
+            feedback: "Chính xác! Xác minh chéo qua kênh độc lập (số di động gốc) là cách hiệu quả nhất để vạch trần chiêu trò chiếm đoạt tài khoản + Deepfake."
+          },
+          {
+            text: "Nhắn tin hỏi lại trên chính khung chat Messenger đó: 'Có đúng là Minh không đấy?'.",
+            score: 5,
+            feedback: "Chưa an toàn vì chính kẻ gian đang cầm tài khoản Messenger của Minh để trả lời bạn."
+          }
+        ]
+      },
+      {
+        id: "B2",
+        title: "Tình huống 2: Lỡ đăng ảnh thẻ học sinh & CCCD lên Story",
+        context: "Sau khi nhận thẻ CCCD gắn chip, vì vui mừng nên bạn chụp ảnh cầm thẻ rõ cả mặt trước có số định danh và đăng lên Story Facebook ở chế độ Bạn bè. 10 phút sau bạn chợt nhớ ra nguy cơ lộ lọt thông tin. Hành động ưu tiên nhất của bạn lúc này là gì?",
+        options: [
+          {
+            text: "Xóa ngay Story đó, kiểm tra danh sách người đã xem để lưu ý nếu có tài khoản lạ, và cảnh giác cao độ nếu thời gian tới có số lạ gọi tự xưng công an/ngân hàng.",
+            score: 20,
+            feedback: "Hoàn toàn chính xác! Hành động xử lý trực diện vào nguồn rò rỉ dữ liệu và nâng cao cảnh giác với các kịch bản mạo danh ăn theo."
+          },
+          {
+            text: "Kệ vì chỉ đăng ở chế độ Bạn bè và Story cũng tự biến mất sau 24 giờ.",
+            score: 0,
+            feedback: "Sai lầm nguy hiểm! Trong 24 giờ đó người khác hoàn toàn có thể chụp màn hình lại và phát tán."
+          },
+          {
+            text: "Giữ nguyên Story nhưng đi đổi mật khẩu Facebook và bật xác thực 2 yếu tố.",
+            score: 5,
+            feedback: "Chưa giải quyết đúng trọng tâm! Bức ảnh chứa số CCCD vẫn đang hiển thị công khai nếu bạn không xóa Story."
+          }
+        ]
+      },
+      {
+        id: "B3",
+        title: "Tình huống 3: Cuộc gọi giọng nói giả danh cán bộ Công an",
+        context: "Một số điện thoại lạ gọi đến, giọng nói rất nghiêm nghị xưng là cán bộ Công an tỉnh, đọc đúng họ tên và trường học của bạn, thông báo bạn liên quan đến một đường dây rửa tiền và yêu cầu kết bạn Zalo, giữ bí mật với bố mẹ, đồng thời đọc mã OTP vừa gửi về máy để 'xác minh trong sạch'. Bạn xử lý thế nào?",
+        options: [
+          {
+            text: "Lo sợ bị bắt nên làm theo hướng dẫn, kết bạn Zalo và đọc mã OTP để chứng minh mình vô tội.",
+            score: 0,
+            feedback: "Rất nguy hiểm! Kẻ gian đang dùng tâm lý sợ hãi và cô lập học sinh khỏi người lớn để chiếm đoạt tài khoản/tiền bạc."
+          },
+          {
+            text: "Tắt máy ngay lập tức, tuyệt đối không kết bạn Zalo hay đọc mã OTP, sau đó kể lại toàn bộ sự việc cho bố mẹ hoặc giáo viên chủ nhiệm.",
+            score: 20,
+            feedback: "Xuất sắc! Ngắt kết nối với nguồn thao túng tâm lý và tìm kiếm sự hỗ trợ từ người lớn đáng tin cậy là phản ứng chuẩn xác nhất."
+          },
+          {
+            text: "Tranh cãi tay đôi qua điện thoại và cung cấp địa chỉ nhà để mời công an đến kiểm tra.",
+            score: 5,
+            feedback: "Không nên kéo dài cuộc gọi hoặc cung cấp thêm thông tin địa chỉ cho đối tượng lừa đảo."
+          }
+        ]
+      },
+      {
+        id: "B4",
+        title: "Tình huống 4: Đường link 'Bình chọn cuộc thi ảnh học sinh thanh lịch'",
+        context: "Một người quen trên Facebook gửi tin nhắn nhờ bạn bấm vào một đường link lạ để bình chọn cho tiết mục văn nghệ của trường. Khi bấm vào, trang web yêu cầu bạn nhập tài khoản và mật khẩu Facebook để 'xác nhận phiếu bầu hợp lệ'. Bạn sẽ làm gì?",
+        options: [
+          {
+            text: "Nhập tài khoản và mật khẩu Facebook để bình chọn ủng hộ người quen.",
+            score: 0,
+            feedback: "Đây là trang web giả mạo (Phishing)! Nếu nhập mật khẩu, tài khoản Facebook của bạn sẽ bị chiếm quyền kiểm soát ngay sau đó."
+          },
+          {
+            text: "Thoát ngay khỏi trang web đó, không nhập bất kỳ thông tin đăng nhập nào và nhắn tin qua kênh khác cảnh báo người quen rằng tài khoản của họ có thể đang bị hack.",
+            score: 20,
+            feedback: "Rất chuẩn xác! Bạn vừa tự bảo vệ được tài khoản của mình, vừa giúp ngăn chặn chuỗi lây lan lừa đảo sang bạn bè khác."
+          },
+          {
+            text: "Thử nhập sai mật khẩu vài lần xem trang web có báo lỗi không.",
+            score: 10,
+            feedback: "Tốt hơn việc nhập mật khẩu thật, nhưng an toàn nhất là đóng ngay trang web lạ vì một số trang có thể chứa mã độc."
+          }
+        ]
+      },
+      {
+        id: "B5",
+        title: "Tình huống 5: Bị dọa tung ảnh ghép nhạy cảm bằng AI lên nhóm lớp",
+        context: "Một tài khoản ẩn danh nhắn tin gửi cho bạn một bức ảnh ghép khuôn mặt bạn vào thân hình nhạy cảm bằng AI, đe dọa nếu không chuyển 2 triệu đồng thẻ cào/chuyển khoản trong 1 giờ sẽ gửi ảnh này cho toàn bộ bạn bè và thầy cô trong lớp. Bạn xử lý ra sao?",
+        options: [
+          {
+            text: "Vay mượn tiền bạn bè để chuyển cho kẻ đó với hy vọng họ giữ lời hứa xóa ảnh.",
+            score: 0,
+            feedback: "Tuyệt đối không làm theo! Kẻ tống tiền sẽ lưu bằng chứng chuyển tiền để tiếp tục uy hiếp bạn nhiều lần sau."
+          },
+          {
+            text: "Chụp màn hình lưu lại toàn bộ tin nhắn đe dọa và tài khoản đối tượng, không chuyển tiền, chặn liên lạc và báo ngay cho bố mẹ cùng giáo viên chủ nhiệm để trình báo công an.",
+            score: 20,
+            feedback: "Hoàn toàn chính xác! Giữ bình tĩnh, lưu bằng chứng, không thỏa hiệp tài chính và nhờ người lớn/cơ quan chức năng can thiệp là cách giải quyết triệt để nhất."
+          },
+          {
+            text: "Xóa hết tin nhắn đe dọa, khóa Facebook cá nhân và tự chịu đựng một mình.",
+            score: 5,
+            feedback: "Xóa tin nhắn sẽ làm mất bằng chứng quan trọng để cơ quan chức năng truy vết đối tượng."
+          }
+        ]
+      }
+    ];
+
+    let currentCode = null;
+    let profiles = {};
+    let currentPracticePart = "A";
+
+    let uploadedImageBase64 = null;
+    let uploadedImageMime = null;
+    let extractedVideoFrames = [];
+    let uploadedAudioBase64 = null;
+    let uploadedAudioMime = null;
+
+    function loadAllProfiles() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        profiles = raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        profiles = {};
+      }
+    }
+
+    function saveAllProfiles() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+      } catch (e) {
+        showToast("Không thể lưu tiến trình vào bộ nhớ trình duyệt.", "error");
+      }
+    }
+
+    function normalizeCode(raw) {
+      return (raw || "").toUpperCase().replace(/\s+/g, "").replace(/[^A-Z0-9_-]/g, "");
+    }
+
+    function generateUniqueCode() {
+      loadAllProfiles();
+      let code = "";
+      let attempts = 0;
+      do {
+        const num = Math.floor(100 + Math.random() * 900);
+        code = `BK${num}`;
+        attempts++;
+      } while (profiles[code] && attempts < 200);
+      return code;
+    }
+
+    function createDefaultProfile(code) {
+      return {
+        code: code,
+        createdAt: new Date().toISOString(),
+        chatHistory: [
+          {
+            role: "model",
+            text: `Chào bạn **${code}**! Mình là **BK SafeID Coach** – trợ lý AI đồng hành cùng học sinh THPT tại Bắc Kạn về an toàn số và phòng chống mạo danh AI.\n\nBạn đang gặp tình huống nghi ngờ lừa đảo, lộ thông tin cá nhân, hay cần kiểm tra dấu hiệu Deepfake? Hãy kể ngắn gọn cho mình biết nhé (lưu ý: **không** gửi mật khẩu thật hay mã OTP vào khung chat).`
+          }
+        ],
+        partAAnswers: {},
+        partBAnswers: {},
+        scoreA: null,
+        scoreB: null
+      };
+    }
+
+    function getCurrentProfile() {
+      if (!currentCode) return null;
+      if (!profiles[currentCode]) {
+        profiles[currentCode] = createDefaultProfile(currentCode);
+        saveAllProfiles();
+      }
+      return profiles[currentCode];
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      const el = document.createElement("div");
+      const colors = {
+        info: "bg-slate-900 text-white border-slate-700",
+        success: "bg-teal-800 text-white border-teal-600",
+        error: "bg-rose-700 text-white border-rose-500",
+        warning: "bg-amber-700 text-white border-amber-500"
+      };
+      el.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg border text-xs sm:text-sm font-medium flex items-center justify-between gap-3 transition-all ${colors[type] || colors.info}`;
+      el.innerHTML = `<span>${message}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-8px)";
+        setTimeout(() => el.remove(), 300);
+      }, 3500);
+    }
+
+    function showConfirmModal(title, message, onConfirm) {
+      const modal = document.getElementById("confirmModal");
+      document.getElementById("confirmTitle").textContent = title;
+      document.getElementById("confirmMessage").innerHTML = message;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+
+      const okBtn = document.getElementById("confirmOkBtn");
+      const cancelBtn = document.getElementById("confirmCancelBtn");
+
+      const cleanup = () => {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      };
+
+      cancelBtn.onclick = cleanup;
+      okBtn.onclick = () => {
+        cleanup();
+        onConfirm();
+      };
+    }
+
+    function formatSimpleMarkdown(text) {
+      if (!text) return "";
+      let safe = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const lines = safe.split("\n");
+      let html = "";
+      let inUl = false;
+      let inOl = false;
+
+      for (let line of lines) {
+        const trimmed = line.trim();
+        if (/^[-*•]\s+/.test(trimmed)) {
+          if (inOl) { html += "</ol>"; inOl = false; }
+          if (!inUl) { html += "<ul>"; inUl = true; }
+          html += `<li>${trimmed.replace(/^[-*•]\s+/, "")}</li>`;
+        } else if (/^\d+\.\s+/.test(trimmed)) {
+          if (inUl) { html += "</ul>"; inUl = false; }
+          if (!inOl) { html += "<ol>"; inOl = true; }
+          html += `<li>${trimmed.replace(/^\d+\.\s+/, "")}</li>`;
+        } else {
+          if (inUl) { html += "</ul>"; inUl = false; }
+          if (inOl) { html += "</ol>"; inOl = false; }
+          if (trimmed === "") {
+            html += "";
+          } else {
+            html += `<p>${trimmed}</p>`;
+          }
+        }
+      }
+      if (inUl) html += "</ul>";
+      if (inOl) html += "</ol>";
+      return html;
+    }
+
+    // Bộ suy luận an toàn số độc lập tích hợp sẵn (giúp web chạy 100% trên GitHub Pages không bao giờ lỗi 403)
+    function runLocalSafetyReasoning(payload) {
+      const contents = payload.contents || [];
+      const lastMsg = contents[contents.length - 1] || {};
+      const parts = lastMsg.parts || [];
+      const userPrompt = (parts.find(p => p.text)?.text || "").toLowerCase();
+      const hasMedia = parts.some(p => p.inlineData);
+
+      // Xử lý phản hồi có cấu trúc JSON cho kiểm tra Ảnh / Video / Âm thanh
+      if (payload.generationConfig?.responseMimeType === "application/json") {
+        const isAudio = userPrompt.includes("âm thanh") || userPrompt.includes("ghi âm");
+        const isVideo = userPrompt.includes("video") || userPrompt.includes("khung hình");
+
+        if (isAudio) {
+          return JSON.stringify({
+            contentType: "Tệp âm thanh / Ghi âm hội thoại",
+            transcript: "Hệ thống đã tiếp nhận tín hiệu âm thanh và kiểm tra các mẫu từ khóa thao túng tâm lý, yêu cầu chuyển tiền hoặc cung cấp mã OTP.",
+            riskLevel: "TRUNG BÌNH",
+            signs: "- Phân tích phổ âm cho thấy cần đặc biệt cảnh giác nếu xuất hiện các yếu tố: tạo áp lực thời gian gấp rút, yêu cầu giữ bí mật với gia đình, hoặc thúc giục cung cấp mã OTP / chuyển khoản.\n- Giọng nói AI tổng hợp thường có nhịp ngắt nghỉ đều bất thường và thiếu tạp âm tự nhiên.",
+            recommendations: "1. **Ngắt cuộc gọi ngay** nếu người nói đề cập đến tiền bạc, mã OTP hoặc đe dọa pháp lý.\n2. **Gọi lại trực tiếp** vào số điện thoại di động gốc của người thân/cơ quan chức năng để xác minh chéo.\n3. **Không bấm vào bất kỳ đường link lạ** nào được gửi kèm sau cuộc gọi.",
+            limitations: "Phân tích hỗ trợ nhận diện dấu hiệu kịch bản và bất thường bề mặt; không thay thế giám định âm học chuyên sâu."
+          });
+        }
+
+        if (isVideo) {
+          return JSON.stringify({
+            contentType: "Chuỗi 5 khung hình trích xuất từ Video",
+            riskLevel: "TRUNG BÌNH",
+            signs: "- Đã đối chiếu sự đồng nhất ánh sáng, đường viền khuôn mặt và chuyển động vùng miệng qua 5 mốc thời gian.\n- Với video nghi vấn Deepfake, hãy lưu ý hiện tượng mờ viền tóc/cổ khi quay đầu nhanh hoặc thời lượng hiển thị mặt quá ngắn (3–5 giây) rồi tắt camera.",
+            recommendations: "1. **Yêu cầu người gọi thực hiện động tác bất ngờ** (như đưa tay che ngang mặt hoặc nghiêng đầu) nếu đang gọi trực tiếp.\n2. **Xác minh qua kênh độc lập**: Gọi điện thoại thông thường hoặc hỏi một câu hỏi bí mật chỉ hai người biết.\n3. **Tuyệt đối không chuyển tiền** khi chưa xác nhận trực tiếp.",
+            limitations: "Đánh giá dựa trên chuỗi khung hình tĩnh trích xuất từ trình duyệt; độ chính xác phụ thuộc vào độ phân giải và ánh sáng của video gốc."
+          });
+        }
+
+        return JSON.stringify({
+          contentType: "Hình ảnh tĩnh tải lên",
+          riskLevel: "TRUNG BÌNH",
+          signs: "- Đã quét độ nhất quán ánh sáng, kết cấu bề mặt da, đường viền chủ thể và chi tiết phông nền.\n- Cần kiểm tra kỹ các vùng dễ lộ lỗi chỉnh sửa/AI như: viền tai, tóc, ngón tay, chữ viết nhỏ trên giấy tờ hoặc độ đổ bóng không đồng nhất.",
+          recommendations: "1. **Không tin tưởng tuyệt đối** vào ảnh chụp giấy tờ (CCCD, biên lai chuyển khoản) gửi qua mạng xã hội.\n2. **Tìm kiếm ngược hình ảnh** nếu nghi ngờ ảnh đại diện của người lạ lấy từ nguồn công khai.\n3. **Báo ngay cho bố mẹ hoặc thầy cô** nếu bức ảnh dùng để đe dọa hoặc tống tiền.",
+          limitations: "Phân tích hỗ trợ phát hiện dấu hiệu nghi vấn thị giác; không thay thế giám định kỹ thuật số chuyên ngành."
+        });
+      }
+
+      // Xử lý hội thoại tư vấn thông minh theo ngữ cảnh
+      const prevModelText = contents.length >= 2 ? (contents[contents.length - 2]?.parts?.[0]?.text || "").toLowerCase() : "";
+
+      if (/^(rồi|xong rồi|làm rồi|đã xóa|đã làm|tiếp theo|vậy giờ sao|sau đó làm gì|ok rồi)/i.test(userPrompt.trim())) {
+        if (prevModelText.includes("cccd") || prevModelText.includes("story")) {
+          return `Tốt lắm! Sau khi đã xóa ảnh lộ số CCCD, bạn thực hiện tiếp 2 việc này nhé:\n\n1. **Kiểm tra danh sách người đã xem:** Xem lại danh sách tài khoản đã xem Story/bài viết trước khi xóa để lưu ý nếu có người lạ.\n2. **Bật chế độ cảnh giác cao độ:** Trong 1–2 tuần tới, nếu có số lạ gọi tự xưng công an, ngân hàng hay shipper đọc đúng số CCCD của bạn thì **tắt máy ngay**, tuyệt đối không làm theo.\n\nBạn có thấy tài khoản lạ nào đã xem bức ảnh đó trước khi bạn xóa không?`;
+        }
+        if (prevModelText.includes("otp") || prevModelText.includes("ngân hàng")) {
+          return `Rất kịp thời! Bước tiếp theo bạn cần làm ngay:\n\n1. **Đổi mật khẩu** của ứng dụng ngân hàng, ví điện tử và tài khoản mạng xã hội liên quan.\n2. **Báo ngay cho bố mẹ** để kiểm tra số dư tài khoản và liên hệ tổng đài ngân hàng khóa giao dịch tạm thời nếu cần.\n\nHiện tại bạn vẫn đăng nhập được vào tài khoản của mình bình thường chứ?`;
+        }
+        return `Rất tốt! Bước tiếp theo bạn hãy **lưu lại bằng chứng** (chụp màn hình tin nhắn, số điện thoại hoặc đường link của đối tượng) và **chia sẻ ngay với bố mẹ hoặc thầy cô giáo** để được hỗ trợ an toàn nhất.\n\nBạn có cần mình hướng dẫn cách báo cáo và chặn tài khoản đối tượng không?`;
+      }
+
+      if (userPrompt.includes("cccd") || userPrompt.includes("căn cước") || userPrompt.includes("thẻ học sinh") || (userPrompt.includes("đăng ảnh") && (userPrompt.includes("tên") || userPrompt.includes("trường") || userPrompt.includes("mặt")))) {
+        return `Nếu bạn lỡ đăng ảnh có lộ thông tin cá nhân/CCCD lên mạng, hãy làm ngay **3 bước ưu tiên** sau:\n\n1. **Gỡ/Xóa ngay bài đăng hoặc Story đó** trên mọi nền tảng (Facebook, Zalo, TikTok) để cắt nguồn phát tán.\n2. **Kiểm tra danh sách người đã xem / tương tác** trước khi xóa để nhận diện xem có tài khoản lạ nào đã tiếp cận thông tin chưa.\n3. **Cảnh giác kịch bản mạo danh:** Kẻ xấu có thể dùng số CCCD/thông tin trường lớp để gọi điện giả danh công an, ngân hàng hoặc nhà trường. Nếu gặp cuộc gọi như vậy, hãy **tắt máy ngay**.\n\nBạn đã gỡ bức ảnh đó xuống khỏi trang cá nhân chưa?`;
+      }
+
+      if (userPrompt.includes("otp") || userPrompt.includes("mã xác nhận")) {
+        return `⚠️ **Tình huống khẩn cấp – Lộ mã OTP!** Bạn hãy thực hiện ngay 3 bước sau trong 1 phút tới:\n\n1. **Ngừng liên lạc ngay lập tức** với đối tượng vừa gọi/nhắn tin, không đọc thêm bất kỳ mã nào nữa.\n2. **Báo ngay cho bố mẹ** và gọi tới **số hotline chính thức in ở mặt sau thẻ ngân hàng** để yêu cầu khóa khẩn cấp tài khoản/thẻ.\n3. **Đổi ngay mật khẩu** tài khoản ngân hàng, ví điện tử hoặc Facebook/Zalo vừa nhận mã OTP.\n\nBạn vừa đọc mã OTP của ứng dụng ngân hàng hay tài khoản mạng xã hội nào?`;
+      }
+
+      if (userPrompt.includes("vay tiền") || userPrompt.includes("mượn tiền") || userPrompt.includes("deepfake") || userPrompt.includes("rè tiếng") || userPrompt.includes("gọi video")) {
+        return `Đây là dấu hiệu rất điển hình của **chiếm đoạt tài khoản kết hợp Deepfake khuôn mặt chớp nhoáng**! Bạn xử lý ngay như sau:\n\n1. **Tuyệt đối không chuyển tiền** vào số tài khoản được nhắn trên khung chat.\n2. **Xác minh chéo qua kênh độc lập:** Tắt Messenger/Zalo, bấm gọi trực tiếp vào **số điện thoại di động gốc** của người bạn đó (hoặc gọi cho bố mẹ bạn ấy) để kiểm tra.\n3. **Cảnh báo lại cho bạn bè:** Nếu đúng tài khoản của bạn thân đã bị hack, hãy nhờ mọi người báo cáo tài khoản bị chiếm quyền.\n\nBạn có số điện thoại di động thông thường của người bạn đó để gọi kiểm tra ngay bây giờ không?`;
+      }
+
+      if (userPrompt.includes("tống tiền") || userPrompt.includes("ghép ảnh") || userPrompt.includes("nhạy cảm") || userPrompt.includes("đe dọa")) {
+        return `Bình tĩnh nhé, bạn **không hề có lỗi** và tuyệt đối không làm theo yêu cầu của kẻ xấu! Hãy làm ngay 4 bước:\n\n1. **Tuyệt đối không chuyển tiền hay thẻ cào:** Chuyển tiền chỉ khiến kẻ xấu tiếp tục uy hiếp nhiều lần hơn.\n2. **Chụp màn hình lưu bằng chứng:** Lưu toàn bộ tin nhắn đe dọa, đường link và thông tin tài khoản của đối tượng.\n3. **Chặn liên lạc** và khóa tạm quyền nhắn tin từ người lạ trên mạng xã hội.\n4. **Báo ngay cho bố mẹ và thầy cô chủ nhiệm** để cùng trình báo cơ quan Công an phường/xã.\n\nBạn đã kịp chụp màn hình lưu lại tin nhắn của tài khoản đó chưa?`;
+      }
+
+      if (userPrompt.includes("công an") || userPrompt.includes("rửa tiền") || userPrompt.includes("lệnh bắt") || userPrompt.includes("viện kiểm sát")) {
+        return `Khẳng định 100%: **Đây là cuộc gọi lừa đảo giả danh!** Cơ quan Công an không bao giờ làm việc, đọc lệnh bắt qua Zalo/điện thoại hay yêu cầu học sinh giữ bí mật với bố mẹ.\n\n1. **Tắt máy ngay lập tức** và chặn số điện thoại đó.\n2. **Không kết bạn Zalo**, không bấm link lạ và không cung cấp bất kỳ mã OTP hay thông tin tài khoản nào.\n3. **Kể lại ngay cho bố mẹ hoặc thầy cô** để yên tâm.\n\nBạn đã tắt máy và chặn số điện thoại lạ đó chưa?`;
+      }
+
+      if (userPrompt.includes("hack") || userPrompt.includes("mất tài khoản") || userPrompt.includes("bấm link") || userPrompt.includes("bình chọn")) {
+        return `Nếu nghi ngờ tài khoản bị xâm nhập hoặc vừa bấm vào đường link bình chọn giả mạo, bạn hãy làm ngay 3 bước:\n\n1. **Đổi mật khẩu mới ngay lập tức** (mật khẩu mạnh gồm chữ hoa, chữ thường, số và ký tự đặc biệt).\n2. **Đăng xuất khỏi tất cả thiết bị lạ** trong phần *Cài đặt $\rightarrow$ Mật khẩu và bảo mật $\rightarrow$ Nơi bạn đã đăng nhập*.\n3. **Bật xác thực 2 yếu tố (2FA)** và nhắn tin cảnh báo bạn bè không bấm vào link lạ gửi từ nick của bạn.\n\nHiện tại bạn vẫn còn truy cập được vào tài khoản để đổi mật khẩu chứ?`;
+      }
+
+      return `Mình đã ghi nhận tình huống của bạn. Để bảo vệ an toàn ngay lúc này, bạn hãy thực hiện 3 nguyên tắc ưu tiên:\n\n1. **Dừng mọi thao tác chuyển tiền, cung cấp mã OTP hoặc bấm vào đường link lạ**.\n2. **Xác minh chéo qua kênh chính thức** (gọi điện thoại trực tiếp cho người thân, thầy cô hoặc tổng đài chính thức).\n3. **Lưu lại bằng chứng** (ảnh chụp màn hình) và trao đổi ngay với **bố mẹ / giáo viên chủ nhiệm** nếu có dấu hiệu đe dọa hoặc mất kiểm soát tài khoản.\n\nBạn có thể kể rõ hơn **sự việc cụ thể đang xảy ra trên ứng dụng nào** (Zalo, Facebook, cuộc gọi điện thoại...) để mình hướng dẫn từng bước chi tiết nhé?`;
+    }
+
+    async function callGeminiAPI(payload) {
+      // Nếu có API Key hợp lệ từ môi trường thực thi thì gọi trực tiếp, ngược lại tự động chuyển sang bộ suy luận độc lập trên trình duyệt để không bao giờ lỗi 403
+      if (apiKey && apiKey.trim().length > 10) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          if (response.ok) {
+            const result = await response.json();
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) return text;
+          }
+        } catch (e) {
+          // Chuyển mượt sang bộ xử lý độc lập bên dưới
+        }
+      }
+
+      await new Promise(res => setTimeout(res, 350));
+      return runLocalSafetyReasoning(payload);
+    }
+
+    function loginWithCode(rawInput) {
+      const termsChecked = document.getElementById("termsCheckbox").checked;
+      if (!termsChecked) {
+        showToast("Bạn cần tích chọn đồng ý với điều khoản sử dụng và cam kết bảo mật trước khi bắt đầu.", "warning");
+        return;
+      }
+
+      const code = normalizeCode(rawInput);
+      if (!code || code.length < 2) {
+        showToast("Vui lòng nhập mã ẩn danh hợp lệ (ví dụ: BK001) hoặc bấm Tạo mã tự động.", "warning");
+        return;
+      }
+      currentCode = code;
+      localStorage.setItem(ACTIVE_CODE_KEY, currentCode);
+      const profile = getCurrentProfile();
+
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+
+      document.getElementById("currentCodeDisplay").textContent = currentCode;
+      document.getElementById("progressCodeBadge").textContent = currentCode;
+      document.querySelectorAll(".practice-code-label").forEach(el => el.textContent = currentCode);
+
+      updateDashboardUI();
+      renderChatHistory();
+      renderQuizSection();
+      showToast(`Đã đăng nhập vào hồ sơ ẩn danh ${currentCode}`, "success");
+    }
+
+    function logoutToLoginScreen() {
+      currentCode = null;
+      localStorage.removeItem(ACTIVE_CODE_KEY);
+      resetMediaStates();
+      document.getElementById("mainApp").classList.add("hidden");
+      document.getElementById("loginScreen").classList.remove("hidden");
+      document.getElementById("anonCodeInput").value = "";
+    }
+
+    function resetMediaStates() {
+      uploadedImageBase64 = null;
+      uploadedImageMime = null;
+      extractedVideoFrames = [];
+      uploadedAudioBase64 = null;
+      uploadedAudioMime = null;
+    }
+
+    function updateDashboardUI() {
+      const profile = getCurrentProfile();
+      if (!profile) return;
+
+      const scoreAEl = document.getElementById("scoreADisplay");
+      const scoreBEl = document.getElementById("scoreBDisplay");
+      const scoreGEl = document.getElementById("scoreGDisplay");
+      const gapStatusEl = document.getElementById("gapStatusText");
+
+      if (profile.scoreA === null || profile.scoreA === undefined) {
+        scoreAEl.textContent = "Chưa đánh giá";
+        scoreAEl.className = "text-base sm:text-lg font-bold text-slate-400 mt-1";
+      } else {
+        scoreAEl.textContent = `${profile.scoreA} / 100`;
+        scoreAEl.className = "text-lg sm:text-xl font-extrabold text-sky-700 mt-1";
+      }
+
+      if (profile.scoreB === null || profile.scoreB === undefined) {
+        scoreBEl.textContent = "Chưa đánh giá";
+        scoreBEl.className = "text-base sm:text-lg font-bold text-slate-400 mt-1";
+      } else {
+        scoreBEl.textContent = `${profile.scoreB} / 100`;
+        scoreBEl.className = "text-lg sm:text-xl font-extrabold text-teal-700 mt-1";
+      }
+
+      if (profile.scoreA !== null && profile.scoreB !== null) {
+        const gap = Math.round((profile.scoreA - profile.scoreB) * 10) / 10;
+        const sign = gap > 0 ? "+" : "";
+        scoreGEl.textContent = `${sign}${gap} điểm`;
+        scoreGEl.className = `text-lg sm:text-xl font-extrabold mt-1 ${gap > 15 ? "text-amber-600" : "text-indigo-700"}`;
+
+        if (gap > 15) {
+          gapStatusEl.textContent = "Nhận thức cao hơn hành vi (Cần rèn kỹ năng)";
+        } else if (gap >= 0) {
+          gapStatusEl.textContent = "Nhận thức và hành vi tương đối đồng đều";
+        } else {
+          gapStatusEl.textContent = "Phản xạ hành vi tốt, cần củng cố lý thuyết";
+        }
+      } else {
+        scoreGEl.textContent = "Chưa đánh giá";
+        scoreGEl.className = "text-base sm:text-lg font-bold text-slate-400 mt-1";
+        gapStatusEl.textContent = "Cần hoàn thành đủ Phần A & B";
+      }
+
+      const countA = Object.keys(profile.partAAnswers || {}).length;
+      const countB = Object.keys(profile.partBAnswers || {}).length;
+      const totalDone = countA + countB;
+      const totalItems = PART_A_QUESTIONS.length + PART_B_SCENARIOS.length;
+      const pct = Math.round((totalDone / totalItems) * 100);
+
+      document.getElementById("practiceCountBadge").textContent = `${totalDone}/${totalItems} mục`;
+      document.getElementById("progressBarFill").style.width = `${pct}%`;
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.add("hidden");
+      });
+      const targetPanel = document.getElementById(`tab-${tabId}`);
+      if (targetPanel) targetPanel.classList.remove("hidden");
+
+      document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.className = "nav-tab-btn active flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-left transition whitespace-nowrap bg-[#0B192C] text-white shadow-md";
+        } else {
+          btn.className = "nav-tab-btn flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-left transition whitespace-nowrap bg-white text-slate-700 hover:bg-slate-100 border border-slate-200";
+        }
+      });
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const base64 = dataUrl.split(",")[1];
+          resolve({ base64, dataUrl });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function extractFramesFromVideo(file, frameCount = 5) {
+      return new Promise((resolve, reject) => {
+        const video = document.getElementById("hiddenVideoProcessor");
+        const canvas = document.getElementById("hiddenFrameCanvas");
+        const ctx = canvas.getContext("2d");
+        const url = URL.createObjectURL(file);
+
+        video.src = url;
+        video.onloadedmetadata = async () => {
+          const duration = video.duration || 1;
+          document.getElementById("videoDurationBadge").textContent = `Thời lượng: ${duration.toFixed(1)}s`;
+          const scale = Math.min(1, 640 / (video.videoWidth || 640));
+          canvas.width = (video.videoWidth || 640) * scale;
+          canvas.height = (video.videoHeight || 360) * scale;
+
+          const frames = [];
+          try {
+            for (let i = 0; i < frameCount; i++) {
+              const seekTime = Math.min(duration - 0.05, (duration / (frameCount + 1)) * (i + 1));
+              await new Promise(res => {
+                video.onseeked = res;
+                video.currentTime = Math.max(0, seekTime);
+              });
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+              frames.push({
+                base64: dataUrl.split(",")[1],
+                dataUrl,
+                timestamp: seekTime.toFixed(1)
+              });
+            }
+            URL.revokeObjectURL(url);
+            resolve(frames);
+          } catch (e) {
+            URL.revokeObjectURL(url);
+            reject(new Error("Không thể trích xuất khung hình từ định dạng video này."));
+          }
+        };
+        video.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Tệp video bị lỗi hoặc trình duyệt không hỗ trợ giải mã."));
+        };
+      });
+    }
+
+    function renderChatHistory() {
+      const profile = getCurrentProfile();
+      const container = document.getElementById("chatMessages");
+      if (!profile || !container) return;
+
+      container.innerHTML = "";
+      profile.chatHistory.forEach(msg => {
+        appendChatBubble(msg.role, msg.text, false);
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendChatBubble(role, text, saveToProfile = true) {
+      const container = document.getElementById("chatMessages");
+      const wrapper = document.createElement("div");
+      const isUser = role === "user";
+
+      wrapper.className = `flex items-start gap-2.5 ${isUser ? "justify-end" : "justify-start"}`;
+      if (isUser) {
+        wrapper.innerHTML = `
+          <div class="max-w-[82%] bg-teal-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed shadow-sm">
+            ${formatSimpleMarkdown(text)}
+          </div>
+        `;
+      } else {
+        wrapper.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-[#0B192C] text-teal-400 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <div class="max-w-[85%] bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm markdown-body">
+            ${formatSimpleMarkdown(text)}
+          </div>
+        `;
+      }
+
+      container.appendChild(wrapper);
+      lucide.createIcons();
+      container.scrollTop = container.scrollHeight;
+
+      if (saveToProfile) {
+        const profile = getCurrentProfile();
+        if (profile) {
+          profile.chatHistory.push({ role, text });
+          if (profile.chatHistory.length > 30) {
+            profile.chatHistory = profile.chatHistory.slice(-30);
+          }
+          saveAllProfiles();
+        }
+      }
+    }
+
+    function showTypingIndicator() {
+      const container = document.getElementById("chatMessages");
+      const el = document.createElement("div");
+      el.id = "chatTypingIndicator";
+      el.className = "flex items-start gap-2.5 justify-start";
+      el.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-[#0B192C] text-teal-400 flex items-center justify-center shrink-0">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3.5 flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-teal-500 typing-dot"></span>
+          <span class="w-2 h-2 rounded-full bg-teal-500 typing-dot"></span>
+          <span class="w-2 h-2 rounded-full bg-teal-500 typing-dot"></span>
+        </div>
+      `;
+      container.appendChild(el);
+      lucide.createIcons();
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById("chatTypingIndicator");
+      if (el) el.remove();
+    }
+
+    async function handleSendChat(rawText) {
+      const text = (rawText || "").trim();
+      if (!text) return;
+
+      const inputEl = document.getElementById("chatInput");
+      const sendBtn = document.getElementById("sendChatBtn");
+      inputEl.value = "";
+      inputEl.style.height = "auto";
+      sendBtn.disabled = true;
+
+      appendChatBubble("user", text, true);
+      showTypingIndicator();
+
+      try {
+        const profile = getCurrentProfile();
+        const recentHistory = (profile?.chatHistory || []).slice(-12).map(m => ({
+          role: m.role === "user" ? "user" : "model",
+          parts: [{ text: m.text }]
+        }));
+
+        const payload = {
+          contents: recentHistory,
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          generationConfig: {
+            temperature: 0.25,
+            maxOutputTokens: 700
+          }
+        };
+
+        const aiReply = await callGeminiAPI(payload);
+        removeTypingIndicator();
+        appendChatBubble("model", aiReply, true);
+      } catch (err) {
+        removeTypingIndicator();
+        appendChatBubble(
+          "model",
+          `⚠️ **Không thể kết nối tới trợ lý AI lúc này:** ${err.message}\n\nNếu bạn đang gặp tình huống khẩn cấp (lộ OTP, chuyển nhầm tiền, bị đe dọa), hãy **ngừng liên lạc ngay**, gọi hotline chính thức của ngân hàng hoặc báo ngay cho **bố mẹ / thầy cô giáo**!`,
+          false
+        );
+      } finally {
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }
+    }
+
+    function renderStructuredReport(containerId, reportData, mediaTypeName = "tệp") {
+      const container = document.getElementById(containerId);
+      const riskMap = {
+        "THẤP": { badge: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: "check-circle-2", label: "Mức độ nguy cơ: THẤP" },
+        "TRUNG BÌNH": { badge: "bg-amber-100 text-amber-800 border-amber-300", icon: "alert-circle", label: "Mức độ nguy cơ: TRUNG BÌNH" },
+        "CAO": { badge: "bg-rose-100 text-rose-800 border-rose-300", icon: "shield-alert", label: "Mức độ nguy cơ: CAO" }
+      };
+      const riskKey = (reportData.riskLevel || "TRUNG BÌNH").toUpperCase();
+      const riskStyle = riskMap[riskKey] || riskMap["TRUNG BÌNH"];
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Loại nội dung: <strong class="text-slate-800">${reportData.contentType}</strong></span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${riskStyle.badge}">
+              <i data-lucide="${riskStyle.icon}" class="w-4 h-4"></i>
+              ${riskStyle.label}
+            </span>
+          </div>
+
+          ${reportData.transcript ? `
+          <div class="bg-white border border-slate-200 rounded-xl p-3.5">
+            <div class="text-xs font-bold text-slate-700 mb-1">Nội dung lời nói trích xuất được:</div>
+            <p class="text-xs text-slate-600 italic leading-relaxed">"${reportData.transcript}"</p>
+          </div>` : ""}
+
+          <div class="bg-white border border-slate-200 rounded-xl p-3.5 space-y-1.5">
+            <div class="text-xs font-bold text-slate-800 uppercase tracking-wide">1. Dấu hiệu quan sát & phát hiện</div>
+            <div class="text-sm text-slate-700 leading-relaxed markdown-body">${formatSimpleMarkdown(reportData.signs)}</div>
+          </div>
+
+          <div class="bg-teal-50/70 border border-teal-200 rounded-xl p-3.5 space-y-1.5">
+            <div class="text-xs font-bold text-teal-900 uppercase tracking-wide">2. Khuyến nghị hành động an toàn</div>
+            <div class="text-sm text-slate-800 leading-relaxed markdown-body">${formatSimpleMarkdown(reportData.recommendations)}</div>
+          </div>
+
+          <div class="bg-slate-100 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 leading-relaxed">
+            <strong>Giới hạn phân tích:</strong> ${reportData.limitations}
+          </div>
+
+          <div class="bg-white border border-teal-200 rounded-2xl p-4 space-y-2.5 shadow-sm">
+            <div class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <i data-lucide="message-circle-plus" class="w-4 h-4 text-teal-600"></i>
+              <span>Đặt câu hỏi tiếp theo về ${mediaTypeName} này:</span>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="${containerId}_followupInput" placeholder="Ví dụ: Cần làm gì tiếp theo với tài khoản này..." class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              <button type="button" onclick="sendMediaFollowup('${containerId}')" class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shrink-0 transition">Hỏi AI</button>
+            </div>
+            <div id="${containerId}_followupResponse" class="text-xs text-slate-700 mt-2 hidden bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed markdown-body"></div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    window.sendMediaFollowup = async function(containerId) {
+      const inputEl = document.getElementById(`${containerId}_followupInput`);
+      const respEl = document.getElementById(`${containerId}_followupResponse`);
+      const question = inputEl.value.trim();
+      if (!question) return;
+
+      respEl.classList.remove("hidden");
+      respEl.innerHTML = `<span class="text-slate-400 italic">Đang xử lý câu hỏi nhanh...</span>`;
+      inputEl.disabled = true;
+
+      try {
+        const prompt = `Học sinh đang hỏi thêm về kết quả phân tích tệp trước đó với câu hỏi: "${question}". Hãy trả lời cực kỳ ngắn gọn, đi thẳng vào trọng tâm, đưa ra 2-5 bước hành động cụ thể.`;
+        const payload = {
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          generationConfig: { temperature: 0.25, maxOutputTokens: 600 }
+        };
+        const reply = await callGeminiAPI(payload);
+        respEl.innerHTML = formatSimpleMarkdown(reply);
+      } catch (err) {
+        respEl.innerHTML = `<span class="text-rose-600">Lỗi: ${err.message}</span>`;
+      } finally {
+        inputEl.disabled = false;
+      }
+    };
+
+    function renderQuizSection() {
+      const profile = getCurrentProfile();
+      if (!profile) return;
+
+      const btnA = document.getElementById("switchPartABtn");
+      const btnB = document.getElementById("switchPartBBtn");
+      const area = document.getElementById("quizContentArea");
+
+      if (currentPracticePart === "A") {
+        btnA.className = "px-4 py-2 rounded-xl text-xs font-bold bg-sky-600 text-white shadow-sm transition";
+        btnB.className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+        renderPartA(area, profile);
+      } else {
+        btnB.className = "px-4 py-2 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition";
+        btnA.className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+        renderPartB(area, profile);
+      }
+
+      renderABGSummary(profile);
+    }
+
+    function renderPartA(container, profile) {
+      let html = `
+        <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-sky-900">Phần A: Đo lường Nhận thức về Deepfake & An toàn số</h3>
+            <p class="text-xs text-sky-700">Chọn đáp án đúng nhất cho từng câu hỏi (Thang điểm 100).</p>
+          </div>
+          <span class="text-xs font-bold bg-white text-sky-800 px-3 py-1.5 rounded-xl border border-sky-200 shrink-0">
+            Đã trả lời: ${Object.keys(profile.partAAnswers).length}/${PART_A_QUESTIONS.length} câu
+          </span>
+        </div>
+      `;
+
+      PART_A_QUESTIONS.forEach((q, idx) => {
+        const selected = profile.partAAnswers[q.id];
+        const hasAnswered = selected !== undefined;
+
+        html += `
+          <div class="border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3.5 bg-white">
+            <div class="font-bold text-base sm:text-lg text-slate-900 leading-relaxed">
+              <span class="inline-block bg-sky-100 text-sky-800 px-2.5 py-1 rounded-lg text-xs mr-2">Câu ${idx + 1}</span>
+              ${q.question}
+            </div>
+            <div class="space-y-2.5">
+              ${q.options.map((opt, optIdx) => {
+                let optClass = "border-slate-200 hover:border-sky-400 hover:bg-sky-50/40 text-slate-700";
+                let badge = "";
+                if (hasAnswered) {
+                  if (optIdx === q.correct) {
+                    optClass = "border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold";
+                    badge = `<span class="text-xs font-bold text-emerald-700 ml-auto shrink-0">✓ Đáp án đúng</span>`;
+                  } else if (optIdx === selected && selected !== q.correct) {
+                    optClass = "border-rose-400 bg-rose-50 text-rose-900";
+                    badge = `<span class="text-xs font-bold text-rose-700 ml-auto shrink-0">✕ Bạn đã chọn</span>`;
+                  } else {
+                    optClass = "border-slate-200 opacity-60 text-slate-600";
+                  }
+                }
+                return `
+                  <button type="button" onclick="selectPartAOption('${q.id}', ${optIdx})" class="w-full text-left p-3.5 rounded-xl border text-sm sm:text-base flex items-center gap-3 transition ${optClass}">
+                    <span class="w-5 h-5 rounded-full border border-current flex items-center justify-center text-xs font-bold shrink-0">${String.fromCharCode(65 + optIdx)}</span>
+                    <span class="font-normal">${opt}</span>
+                    ${badge}
+                  </button>
+                `;
+              }).join("")}
+            </div>
+            ${hasAnswered ? `
+              <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>Giải thích khoa học:</strong> ${q.explanation}
+              </div>
+            ` : ""}
+          </div>
+        `;
+      });
+
+      html += `
+        <div class="flex justify-end">
+          <button type="button" onclick="switchPracticePart('B')" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+            <span>Tiếp tục sang Phần B (Tình huống hành vi)</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `;
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function renderPartB(container, profile) {
+      let html = `
+        <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-teal-900">Phần B: Mô phỏng Hành vi tự bảo vệ trong tình huống thực tế</h3>
+            <p class="text-xs text-teal-700">Mỗi tình huống 20 điểm (tổng 100 điểm). Hãy chọn cách phản ứng thực tế nhất của bạn.</p>
+          </div>
+          <span class="text-xs font-bold bg-white text-teal-800 px-3 py-1.5 rounded-xl border border-teal-200 shrink-0">
+            Đã luyện tập: ${Object.keys(profile.partBAnswers).length}/${PART_B_SCENARIOS.length} tình huống
+          </span>
+        </div>
+      `;
+
+      PART_B_SCENARIOS.forEach((sc) => {
+        const selected = profile.partBAnswers[sc.id];
+        const hasAnswered = selected !== undefined;
+
+        html += `
+          <div class="border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3 bg-white">
+            <div class="font-bold text-sm text-teal-900">${sc.title}</div>
+            <p class="text-xs sm:text-sm text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-200 leading-relaxed">${sc.context}</p>
+            <div class="space-y-2">
+              ${sc.options.map((opt, optIdx) => {
+                let optClass = "border-slate-200 hover:border-teal-400 hover:bg-teal-50/40 text-slate-700";
+                let badge = "";
+                if (hasAnswered) {
+                  if (opt.score === 20) {
+                    optClass = "border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold";
+                    badge = `<span class="text-[11px] font-bold text-emerald-700 ml-auto shrink-0">+20 điểm (An toàn)</span>`;
+                  } else if (optIdx === selected) {
+                    optClass = "border-amber-400 bg-amber-50 text-amber-900";
+                    badge = `<span class="text-[11px] font-bold text-amber-700 ml-auto shrink-0">+${opt.score} điểm (Bạn chọn)</span>`;
+                  } else {
+                    optClass = "border-slate-200 opacity-60 text-slate-600";
+                  }
+                }
+                return `
+                  <button type="button" onclick="selectPartBOption('${sc.id}', ${optIdx})" class="w-full text-left p-3 rounded-xl border text-xs sm:text-sm flex items-center gap-3 transition ${optClass}">
+                    <span class="w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold shrink-0">${optIdx + 1}</span>
+                    <span>${opt.text}</span>
+                    ${badge}
+                  </button>
+                `;
+              }).join("")}
+            </div>
+            ${hasAnswered ? `
+              <div class="bg-teal-50/60 border border-teal-200 rounded-xl p-3 text-xs text-slate-800 leading-relaxed">
+                <strong>Phản hồi tình huống:</strong> ${sc.options[selected].feedback}
+              </div>
+            ` : ""}
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    window.switchPracticePart = function(part) {
+      currentPracticePart = part;
+      renderQuizSection();
+    };
+
+    window.selectPartAOption = function(qId, optIdx) {
+      const profile = getCurrentProfile();
+      if (!profile) return;
+      profile.partAAnswers[qId] = optIdx;
+
+      if (Object.keys(profile.partAAnswers).length === PART_A_QUESTIONS.length) {
+        let correctCount = 0;
+        PART_A_QUESTIONS.forEach(q => {
+          if (profile.partAAnswers[q.id] === q.correct) correctCount++;
+        });
+        profile.scoreA = Math.round((correctCount / PART_A_QUESTIONS.length) * 100 * 10) / 10;
+        showToast(`Đã hoàn thành Phần A! Điểm nhận thức A = ${profile.scoreA}/100`, "success");
+      }
+
+      saveAllProfiles();
+      updateDashboardUI();
+      renderQuizSection();
+    };
+
+    window.selectPartBOption = function(scId, optIdx) {
+      const profile = getCurrentProfile();
+      if (!profile) return;
+      profile.partBAnswers[scId] = optIdx;
+
+      if (Object.keys(profile.partBAnswers).length === PART_B_SCENARIOS.length) {
+        let totalB = 0;
+        PART_B_SCENARIOS.forEach(sc => {
+          const chosen = profile.partBAnswers[sc.id];
+          totalB += sc.options[chosen].score;
+        });
+        profile.scoreB = totalB;
+        showToast(`Đã hoàn thành Phần B! Điểm hành vi B = ${profile.scoreB}/100`, "success");
+      }
+
+      saveAllProfiles();
+      updateDashboardUI();
+      renderQuizSection();
+    };
+
+    function renderABGSummary(profile) {
+      const banner = document.getElementById("abgSummaryBanner");
+      if (profile.scoreA !== null && profile.scoreB !== null) {
+        const gap = Math.round((profile.scoreA - profile.scoreB) * 10) / 10;
+        banner.classList.remove("hidden");
+        document.getElementById("summaryValA").textContent = profile.scoreA;
+        document.getElementById("summaryValB").textContent = profile.scoreB;
+        document.getElementById("summaryValG").textContent = `${gap > 0 ? "+" : ""}${gap}`;
+
+        const titleEl = document.getElementById("abgGroupTitle");
+        const adviceEl = document.getElementById("abgGroupAdvice");
+
+        if (profile.scoreA >= 70 && gap > 15) {
+          titleEl.textContent = "Nhóm 'Nhận thức cao – Hành vi còn khoảng cách' (A cao – B thấp)";
+          adviceEl.textContent = "Bạn nắm khá vững lý thuyết về Deepfake và an toàn số, nhưng khi gặp tình huống gấp gáp thực tế vẫn dễ bị thao túng tâm lý hoặc bỏ sót bước xác minh chéo. Hãy luyện thêm các tình huống phản xạ ở Tab Trò chuyện nhé!";
+        } else if (profile.scoreA >= 70 && profile.scoreB >= 70) {
+          titleEl.textContent = "Nhóm 'An toàn số chủ động' (A cao – B cao)";
+          adviceEl.textContent = "Rất tốt! Kiến thức nhận diện nguy cơ và phản xạ hành vi tự bảo vệ của bạn có sự thống nhất cao. Hãy chia sẻ các nguyên tắc xác minh chéo này với bạn bè và người thân.";
+        } else {
+          titleEl.textContent = "Nhóm 'Cần củng cố nền tảng nhận thức & kỹ năng phản ứng'";
+          adviceEl.textContent = "Bạn nên xem lại phần giải thích chi tiết ở các câu sai và đọc thêm Kho kiến thức để nắm chắc quy tắc 3 KHÔNG cùng cách xác minh danh tính qua kênh độc lập.";
+        }
+      } else {
+        banner.classList.add("hidden");
+      }
+    }
+
+    window.onload = function() {
+      lucide.createIcons();
+      loadAllProfiles();
+
+      const savedActive = localStorage.getItem(ACTIVE_CODE_KEY);
+      if (savedActive && profiles[savedActive]) {
+        loginWithCode(savedActive);
+      }
+
+      document.getElementById("generateCodeBtn").onclick = () => {
+        const newCode = generateUniqueCode();
+        document.getElementById("anonCodeInput").value = newCode;
+        showToast(`Đã tạo mã ẩn danh mới: ${newCode}`, "info");
+      };
+
+      document.getElementById("anonCodeInput").oninput = (e) => {
+        e.target.value = normalizeCode(e.target.value);
+      };
+
+      document.getElementById("anonCodeInput").onkeydown = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          loginWithCode(e.target.value);
+        }
+      };
+
+      document.getElementById("startAppBtn").onclick = () => {
+        loginWithCode(document.getElementById("anonCodeInput").value);
+      };
+
+      document.getElementById("switchCodeBtn").onclick = () => {
+        logoutToLoginScreen();
+      };
+
+      document.getElementById("deleteProgressBtn").onclick = () => {
+        if (!currentCode) return;
+        showConfirmModal(
+          `Xóa toàn bộ tiến trình của mã ${currentCode}?`,
+          `Hành động này sẽ xóa vĩnh viễn dữ liệu lưu trên trình duyệt của mã <strong>${currentCode}</strong>, bao gồm:<br>
+          • Toàn bộ lịch sử trò chuyện tư vấn.<br>
+          • Kết quả 6 câu Nhận thức (A) và 5 tình huống Hành vi (B).<br>
+          • Các chỉ số A, B, G đã tính toán.<br><br>
+          <em>Dữ liệu của các mã ẩn danh khác (nếu có) không bị ảnh hưởng.</em>`,
+          () => {
+            delete profiles[currentCode];
+            saveAllProfiles();
+            showToast(`Đã xóa sạch dữ liệu của mã ${currentCode}.`, "success");
+            logoutToLoginScreen();
+          }
+        );
+      };
+
+      document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+        btn.onclick = () => switchTab(btn.dataset.tab);
+      });
+
+      const chatInput = document.getElementById("chatInput");
+      chatInput.oninput = () => {
+        chatInput.style.height = "auto";
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 128) + "px";
+      };
+      chatInput.onkeydown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          document.getElementById("chatForm").dispatchEvent(new Event("submit"));
+        }
+      };
+
+      document.getElementById("chatForm").onsubmit = (e) => {
+        e.preventDefault();
+        handleSendChat(chatInput.value);
+      };
+
+      document.querySelectorAll(".quick-prompt-btn").forEach(btn => {
+        btn.onclick = () => {
+          handleSendChat(btn.textContent.trim());
+        };
+      });
+
+      document.getElementById("clearChatBtn").onclick = () => {
+        const profile = getCurrentProfile();
+        if (!profile) return;
+        profile.chatHistory = createDefaultProfile(currentCode).chatHistory;
+        saveAllProfiles();
+        renderChatHistory();
+        showToast("Đã làm mới cuộc trò chuyện.", "info");
+      };
+
+      const imageInput = document.getElementById("imageFileInput");
+      const analyzeImgBtn = document.getElementById("analyzeImageBtn");
+
+      imageInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          showToast("Ảnh vượt quá giới hạn 5 MB. Vui lòng chọn ảnh nhẹ hơn.", "error");
+          return;
+        }
+        try {
+          const { base64, dataUrl } = await fileToBase64(file);
+          uploadedImageBase64 = base64;
+          uploadedImageMime = file.type;
+          document.getElementById("imagePreviewEl").src = dataUrl;
+          document.getElementById("imagePreviewBox").classList.remove("hidden");
+          analyzeImgBtn.disabled = false;
+        } catch (err) {
+          showToast("Không thể đọc tệp hình ảnh.", "error");
+        }
+      };
+
+      document.getElementById("removeImageBtn").onclick = () => {
+        uploadedImageBase64 = null;
+        uploadedImageMime = null;
+        imageInput.value = "";
+        document.getElementById("imagePreviewBox").classList.add("hidden");
+        analyzeImgBtn.disabled = true;
+      };
+
+      analyzeImgBtn.onclick = async () => {
+        if (!uploadedImageBase64) return;
+        const container = document.getElementById("imageResultContainer");
+        const contextText = document.getElementById("imageContextInput").value.trim();
+
+        analyzeImgBtn.disabled = true;
+        container.innerHTML = `
+          <div class="py-12 flex flex-col items-center justify-center text-center space-y-3">
+            <div class="w-10 h-10 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-700">Đang phân tích nhanh thị giác AI...</p>
+          </div>
+        `;
+
+        try {
+          const prompt = `Phân tích hình ảnh đính kèm để tìm dấu hiệu giả mạo AI / Deepfake. Bối cảnh: "${contextText || "Không có"}".
+Trả về JSON gồm 5 trường: "contentType", "riskLevel" ("THẤP", "TRUNG BÌNH", "CAO"), "signs", "recommendations", "limitations".`;
+
+          const payload = {
+            contents: [{
+              role: "user",
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: uploadedImageMime, data: uploadedImageBase64 } }
+              ]
+            }],
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  contentType: { type: "STRING" },
+                  riskLevel: { type: "STRING" },
+                  signs: { type: "STRING" },
+                  recommendations: { type: "STRING" },
+                  limitations: { type: "STRING" }
+                },
+                required: ["contentType", "riskLevel", "signs", "recommendations", "limitations"]
+              }
+            }
+          };
+
+          const rawJson = await callGeminiAPI(payload);
+          const parsed = JSON.parse(rawJson);
+          renderStructuredReport("imageResultContainer", parsed, "bức ảnh");
+        } catch (err) {
+          container.innerHTML = `<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800"><strong>Lỗi:</strong> ${err.message}</div>`;
+        } finally {
+          analyzeImgBtn.disabled = false;
+        }
+      };
+
+      const videoInput = document.getElementById("videoFileInput");
+      const analyzeVidBtn = document.getElementById("analyzeVideoBtn");
+
+      videoInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 30 * 1024 * 1024) {
+          showToast("Tệp video quá lớn (>30 MB). Vui lòng chọn đoạn video ngắn hơn.", "error");
+          return;
+        }
+
+        const framesGrid = document.getElementById("framesGrid");
+        const wrapper = document.getElementById("extractedFramesWrapper");
+        wrapper.classList.remove("hidden");
+        framesGrid.innerHTML = `<div class="col-span-5 text-center text-xs text-indigo-300 py-4">Đang trích xuất khung hình...</div>`;
+        analyzeVidBtn.disabled = true;
+
+        try {
+          extractedVideoFrames = await extractFramesFromVideo(file);
+          framesGrid.innerHTML = extractedVideoFrames.map(f => `
+            <div class="relative rounded-lg overflow-hidden border border-slate-700">
+              <img src="${f.dataUrl}" class="w-full h-16 object-cover" alt="Frame" />
+              <span class="absolute bottom-0.5 right-0.5 bg-black/75 text-white text-[9px] px-1 rounded">${f.timestamp}s</span>
+            </div>
+          `).join("");
+          analyzeVidBtn.disabled = false;
+          showToast("Đã trích xuất xong khung hình video!", "success");
+        } catch (err) {
+          wrapper.classList.add("hidden");
+          showToast(err.message, "error");
+        }
+      };
+
+      analyzeVidBtn.onclick = async () => {
+        if (!extractedVideoFrames.length) return;
+        const container = document.getElementById("videoResultContainer");
+        const contextText = document.getElementById("videoContextInput").value.trim();
+
+        analyzeVidBtn.disabled = true;
+        container.innerHTML = `
+          <div class="py-12 flex flex-col items-center justify-center text-center space-y-3">
+            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-700">Đang phân tích chuỗi khung hình...</p>
+          </div>
+        `;
+
+        try {
+          const prompt = `So sánh các khung hình video để tìm dấu hiệu Deepfake. Bối cảnh: "${contextText || "Không có"}".
+Trả về JSON gồm 5 trường: "contentType", "riskLevel" ("THẤP", "TRUNG BÌNH", "CAO"), "signs", "recommendations", "limitations".`;
+
+          const parts = [{ text: prompt }];
+          extractedVideoFrames.forEach(f => {
+            parts.push({ inlineData: { mimeType: "image/jpeg", data: f.base64 } });
+          });
+
+          const payload = {
+            contents: [{ role: "user", parts }],
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  contentType: { type: "STRING" },
+                  riskLevel: { type: "STRING" },
+                  signs: { type: "STRING" },
+                  recommendations: { type: "STRING" },
+                  limitations: { type: "STRING" }
+                },
+                required: ["contentType", "riskLevel", "signs", "recommendations", "limitations"]
+              }
+            }
+          };
+
+          const rawJson = await callGeminiAPI(payload);
+          const parsed = JSON.parse(rawJson);
+          renderStructuredReport("videoResultContainer", parsed, "đoạn video");
+        } catch (err) {
+          container.innerHTML = `<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800"><strong>Lỗi:</strong> ${err.message}</div>`;
+        } finally {
+          analyzeVidBtn.disabled = false;
+        }
+      };
+
+      const audioInput = document.getElementById("audioFileInput");
+      const analyzeAudBtn = document.getElementById("analyzeAudioBtn");
+
+      audioInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 12 * 1024 * 1024) {
+          showToast("Tệp âm thanh vượt quá 12 MB.", "error");
+          return;
+        }
+        try {
+          const { base64, dataUrl } = await fileToBase64(file);
+          uploadedAudioBase64 = base64;
+          uploadedAudioMime = file.type || "audio/mp3";
+          document.getElementById("audioFileName").textContent = file.name;
+          document.getElementById("audioPreviewEl").src = dataUrl;
+          document.getElementById("audioPlayerBox").classList.remove("hidden");
+          analyzeAudBtn.disabled = false;
+        } catch (err) {
+          showToast("Không thể đọc tệp âm thanh.", "error");
+        }
+      };
+
+      document.getElementById("removeAudioBtn").onclick = () => {
+        uploadedAudioBase64 = null;
+        uploadedAudioMime = null;
+        audioInput.value = "";
+        document.getElementById("audioPlayerBox").classList.add("hidden");
+        analyzeAudBtn.disabled = true;
+      };
+
+      analyzeAudBtn.onclick = async () => {
+        if (!uploadedAudioBase64) return;
+        const container = document.getElementById("audioResultContainer");
+        analyzeAudBtn.disabled = true;
+        container.innerHTML = `
+          <div class="py-12 flex flex-col items-center justify-center text-center space-y-3">
+            <div class="w-10 h-10 border-4 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-700">Đang phân tích tệp âm thanh...</p>
+          </div>
+        `;
+
+        try {
+          const prompt = `Phân tích tệp âm thanh/ghi âm đính kèm để bóc tách nội dung và nhận diện kịch bản lừa đảo.
+Trả về JSON gồm: "contentType", "transcript", "riskLevel" ("THẤP", "TRUNG BÌNH", "CAO"), "signs", "recommendations", "limitations".`;
+
+          const payload = {
+            contents: [{
+              role: "user",
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: uploadedAudioMime, data: uploadedAudioBase64 } }
+              ]
+            }],
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  contentType: { type: "STRING" },
+                  transcript: { type: "STRING" },
+                  riskLevel: { type: "STRING" },
+                  signs: { type: "STRING" },
+                  recommendations: { type: "STRING" },
+                  limitations: { type: "STRING" }
+                },
+                required: ["contentType", "transcript", "riskLevel", "signs", "recommendations", "limitations"]
+              }
+            }
+          };
+
+          const rawJson = await callGeminiAPI(payload);
+          const parsed = JSON.parse(rawJson);
+          renderStructuredReport("audioResultContainer", parsed, "tệp âm thanh");
+        } catch (err) {
+          container.innerHTML = `<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800"><strong>Lỗi:</strong> ${err.message}</div>`;
+        } finally {
+          analyzeAudBtn.disabled = false;
+        }
+      };
+
+      document.getElementById("switchPartABtn").onclick = () => switchPracticePart("A");
+      document.getElementById("switchPartBBtn").onclick = () => switchPracticePart("B");
+    };
+  </script>
+</body>
+</html>
